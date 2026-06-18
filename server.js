@@ -4,7 +4,7 @@ const server = express();
 const cors = require("cors");
 server.use(
   cors({
-    origin: ["http://localhost:5173/"],
+    origin: ["http://localhost:5173"],
   }),
 );
 server.use(express.json());
@@ -19,6 +19,7 @@ server.get("/", async (req, res) => {
 });
 //controllers
 const registrationRouter = require("./controllers/registration");
-
+const loginRouter = require("./controllers/login");
 //use controllers
 server.use("/register/user", registrationRouter);
+server.use("/signin/user", loginRouter);
