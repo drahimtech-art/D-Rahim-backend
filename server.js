@@ -1,12 +1,13 @@
 const express = require("express");
 const server = express();
-//require("dotenv").config();
+require("dotenv").config();
 const cors = require("cors");
 server.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [process.env.FRONTEND_URL_DEV, process.env.FRONTEND_URL],
   }),
 );
+server.use("/api/paystack/webhook", express.raw({ type: "application/json" }));
 server.use(express.json());
 const port = process.env.SERVER_PORT || 5000;
 //
@@ -20,6 +21,10 @@ server.get("/", async (req, res) => {
 //controllers
 const registrationRouter = require("./controllers/registration");
 const loginRouter = require("./controllers/login");
+const paymentRouter = require("./controllers/payment");
+const studentsDataRouter = require("./controllers/studentsData");
 //use controllers
 server.use("/register/user", registrationRouter);
 server.use("/signin/user", loginRouter);
+//server.use("/payment", paymentRouter);
+server.use("/students/", studentsDataRouter);
