@@ -22,7 +22,7 @@ function validateReqBody(req, res, next) {
   const email = body.email;
   const password = body.password;
   if (!email || !password)
-    return res.status(403).json({ ok: false, message: "invalide requst body" });
+    return res.status(400).json({ ok: false, message: "invalide requst body" });
   next();
 }
 loginRouter.post("/", validateReqBody, async (req, res) => {
@@ -35,7 +35,7 @@ loginRouter.post("/", validateReqBody, async (req, res) => {
       return res.status(404).json({ ok: false, message: "No records found" });
     if (requst[0].role.code !== process.env.STUDENT_CODE)
       return res
-        .status(303)
+        .status(403)
         .json({ ok: false, message: "access denied user not verified" });
     const isPasswordCorrect = await bcrypt.compare(
       password,
@@ -68,22 +68,23 @@ loginRouter.get("/validate/", async (req, res) => {
   try {
     const token = req.cookies.token;
     if (!token)
-      return res.status(403).json({
+      return res.status(401).json({
         ok: false,
         message: "access denied user not validated pls login",
       });
     const tokenData = await jwt.verify(token, process.env.ACCESS_TOKEN);
     if (!tokenData)
       return res
-        .status(403)
-        .json({ ok: false, message: "invalied session token pls login" });
+        .status(401)
+        .json({ ok: false, message: "invalid session token pls login" });
     const requst = await userData.find({ _id: tokenData._id });
     if (requst.length === 0)
       return res.status(404).json({ ok: false, message: "no records found" });
     if (requst[0].role.code !== process.env.STUDENT_CODE)
-      return res
-        .status(303)
-        .json({ ok: false, message: "access denied  user not verified" });
+      return res.status(403).json({
+        ok: false,
+        message: "access denied user permissions not verified",
+      });
     const respondsData = {
       firstName: requst[0].firstName,
       lastName: requst[0].lastName,
