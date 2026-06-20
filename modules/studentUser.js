@@ -36,4 +36,4 @@ const userShema = new Schema({
 });
 
 const studentInfor = mongoose.model("studentsInfo", userShema);
-module.exports = studentInfo;
+module.exports = studentInfor;
