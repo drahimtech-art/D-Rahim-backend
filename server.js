@@ -4,6 +4,7 @@ require("dotenv").config();
 const cors = require("cors");
 const cookieparesr = require("cookie-parser");
 server.use(cookieparesr());
+server.use(express.json());
 server.use(
   cors({
     origin: [process.env.FRONTEND_URL_DEV, process.env.FRONTEND_URL],
@@ -12,7 +13,6 @@ server.use(
 );
 const moongose = require("mongoose");
 server.use("/api/paystack/webhook", express.raw({ type: "application/json" }));
-server.use(express.json());
 const port = process.env.SERVER_PORT || 5000;
 //
 moongose
