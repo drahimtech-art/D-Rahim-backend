@@ -27,6 +27,19 @@ function validateReqBody(req, res, next) {
   const password = body.password;
   if (!email || !password)
     return res.status(400).json({ ok: false, message: "invalide requst body" });
+  function validateEmail(e) {
+    if (typeof e !== "string") return false;
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(e.trim());
+  }
+  const isEmailValid = validateEmail(email);
+  if (!isEmailValid)
+    return res
+      .status(400)
+      .json({
+        ok: false,
+        message: "invalide requst, email address is not valid",
+      });
   next();
 }
 loginRouter.post("/", validateReqBody, async (req, res) => {

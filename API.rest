@@ -7,9 +7,9 @@ Content-Type: application/json
     "lastName" : "Nwanoruo",
     "email" : "nwanoruovictory87@gmail.com",
     "password" : "1234",
-    "dateOfBirth" : "4/07/2004",
+    "dateOfBirth" : "04/07/2004",
     "phoneNumber": "08066859429",
-  "bio": "Hi i'm victory a fullstack web developer focused on buliding high performance scalable web applications"
+    "bio": "Hi i'm victory a fullstack web developer focused on buliding high performance scalable web applications"
 }
 ###
 POST http://localhost:5000/signin/user

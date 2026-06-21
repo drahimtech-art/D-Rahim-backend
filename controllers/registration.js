@@ -3,7 +3,70 @@ const registrationRouter = express.Router();
 const bcrypt = require("bcryptjs");
 const userData = require("../modules/studentUser");
 //
-registrationRouter.post("/", async (req, res) => {
+//middle ware
+const requstBodyValidation = async (req, res, next) => {
+  //email validation
+  function validateEmail(e) {
+    if (typeof e !== "string") return false;
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(e.trim());
+  }
+  //
+  function dateOfBirthFormatValidation(d) {
+    const date = d.split("/");
+    if (date.length !== 3) return false;
+    const month = date[0];
+    const day = date[1];
+    const year = date[2];
+    if (
+      month.split("").length === 2 &&
+      day.split("").length === 2 &&
+      year.split("").length === 4
+    )
+      return true;
+    return false;
+  }
+  try {
+    const body = req.body;
+    const firstName = body.firstName;
+    const lastName = body.lastName;
+    const dateOfBirth = body.dateOfBirth;
+    const password = body.password;
+    const phoneNumber = body.phoneNumber;
+    const email = body.email;
+    const bio = body.bio;
+    if (!body)
+      return res
+        .status(400)
+        .json({ ok: false, message: "invalid requst body" });
+    if (
+      !password ||
+      !email ||
+      !phoneNumber ||
+      !lastName ||
+      !firstName ||
+      !dateOfBirth ||
+      !bio
+    )
+      return res
+        .status(400)
+        .json({ ok: false, message: "invalid requst body" });
+    if (!dateOfBirthFormatValidation(dateOfBirth))
+      return res
+        .status(400)
+        .json({ ok: false, message: "invalid requst body, invalid date" });
+    const isEmailValid = validateEmail(email);
+    if (!isEmailValid)
+      return res.status(400).json({
+        ok: false,
+        message: "invalid requst, email address is not valid",
+      });
+    next();
+  } catch (error) {
+    res.status(500).json({ ok: true, message: `Server error: ${error}` });
+  }
+};
+registrationRouter.post("/", requstBodyValidation, async (req, res) => {
   const body = req.body;
   const password = body.password;
   const phoneNumber = body.phoneNumber;
