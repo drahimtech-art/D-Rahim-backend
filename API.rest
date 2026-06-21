@@ -3,20 +3,22 @@ POST http://localhost:5000/register/user
 Content-Type: application/json
 
 {
-    "firstName" : "James",
-    "lastName" : "Will",
-    "email" : "jameswill24@gmail.com",
+    "firstName" : "Victory",
+    "lastName" : "Nwanoruo",
+    "email" : "nwanoruovictory87@gmail.com",
     "password" : "1234",
-    "dateOfBirth" : "4/07/2004"
+    "dateOfBirth" : "4/07/2004",
+    "phoneNumber": "08066859429",
+  "bio": "Hi i'm victory a fullstack web developer focused on buliding high performance scalable web applications"
 }
 ###
 POST http://localhost:5000/signin/user
-X-Frontend-Key: vkicwfrkn
+X-Frontend-Key: 86d18ffe-09a5-43ef-8008-608dc117c4f476dae630-f1c6-4379-b8da-f1106f6c1f50
 Content-Type: application/json
 
 
 {
-    "email" : "jameswill24@gmail.com",
+    "email" : "nwanoruovictory87@gmail.com",
     "password" : "1234"
     
 }
