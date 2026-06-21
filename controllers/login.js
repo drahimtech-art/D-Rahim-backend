@@ -80,8 +80,10 @@ loginRouter.get(
     const tokenId = res.tokenId;
     try {
       const requst = await userData.find({ _id: tokenId });
-      if (requst.length === 0)
+      if (requst.length === 0) {
+        res.clearCookie("token");
         return res.status(404).json({ ok: false, message: "no records found" });
+      }
       if (requst[0].role.code !== process.env.STUDENT_CODE)
         return res.status(403).json({
           ok: false,

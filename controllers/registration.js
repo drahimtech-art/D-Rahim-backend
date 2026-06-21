@@ -6,6 +6,8 @@ const userData = require("../modules/studentUser");
 registrationRouter.post("/", async (req, res) => {
   const body = req.body;
   const password = body.password;
+  const phoneNumber = body.phoneNumber;
+  const bio = body.bio;
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
     const isEmailFound = await userData.find({ email: body.email });
@@ -19,6 +21,8 @@ registrationRouter.post("/", async (req, res) => {
       email: body.email,
       dateOfBirth: body.dateOfBirth,
       password: hashedPassword,
+      phoneNumber: body.phoneNumber,
+      bio: body.bio,
       role: {
         code: process.env.STUDENT_CODE,
         type: "students",
