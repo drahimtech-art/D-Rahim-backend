@@ -3,6 +3,7 @@ const registrationRouter = express.Router();
 const bcrypt = require("bcryptjs");
 const userData = require("../modules/studentUser");
 //
+const apiRequstValidation = require("../middlewares/apiValidation");
 //middle ware
 const requstBodyValidation = async (req, res, next) => {
   //email validation
@@ -25,6 +26,11 @@ const requstBodyValidation = async (req, res, next) => {
     )
       return true;
     return false;
+  }
+  function phoneNumberValidation(n) {
+    const phoneNumber = n.split("");
+    if (phoneNumber.length !== 11) return false;
+    return true;
   }
   try {
     const body = req.body;
@@ -61,41 +67,64 @@ const requstBodyValidation = async (req, res, next) => {
         ok: false,
         message: "invalid requst, email address is not valid",
       });
+    if (!phoneNumberValidation(phoneNumber))
+      return res.status(400).json({
+        ok: false,
+        message: "invalid requst, phone number is in valid expected 11 digits",
+      });
+    if (
+      typeof email !== "string" ||
+      typeof password !== "string" ||
+      typeof firstName !== "string" ||
+      typeof lastName !== "string" ||
+      typeof phoneNumber !== "string" ||
+      typeof dateOfBirth !== "string" ||
+      typeof bio !== "string"
+    )
+      return res.status(400).json({
+        ok: false,
+        message: "invalid body requst data type isent of type required ",
+      });
     next();
   } catch (error) {
     res.status(500).json({ ok: true, message: `Server error: ${error}` });
   }
 };
-registrationRouter.post("/", requstBodyValidation, async (req, res) => {
-  const body = req.body;
-  const password = body.password;
-  const phoneNumber = body.phoneNumber;
-  const bio = body.bio;
-  const hashedPassword = await bcrypt.hash(password, 10);
-  try {
-    const isEmailFound = await userData.find({ email: body.email });
-    if (isEmailFound.length !== 0)
-      return res
-        .status(403)
-        .json({ ok: false, massage: "email already exist with records" });
-    const createUser = new userData({
-      firstName: body.firstName,
-      lastName: body.lastName,
-      email: body.email,
-      dateOfBirth: body.dateOfBirth,
-      password: hashedPassword,
-      phoneNumber: body.phoneNumber,
-      bio: body.bio,
-      role: {
-        code: process.env.STUDENT_CODE,
-        type: "students",
-      },
-    });
-    const adduser = await createUser.save();
-    res.status(201).json({ ok: true, message: "succesfull" });
-  } catch (error) {
-    res.status(200).json({ ok: false, message: `server error: ${error} ` });
-  }
-});
+registrationRouter.post(
+  "/",
+  apiRequstValidation,
+  requstBodyValidation,
+  async (req, res) => {
+    const body = req.body;
+    const password = body.password;
+    const phoneNumber = body.phoneNumber;
+    const bio = body.bio;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    try {
+      const isEmailFound = await userData.find({ email: body.email });
+      if (isEmailFound.length !== 0)
+        return res
+          .status(403)
+          .json({ ok: false, massage: "email already exist with records" });
+      const createUser = new userData({
+        firstName: body.firstName,
+        lastName: body.lastName,
+        email: body.email,
+        dateOfBirth: body.dateOfBirth,
+        password: hashedPassword,
+        phoneNumber: body.phoneNumber,
+        bio: body.bio,
+        role: {
+          code: process.env.STUDENT_CODE,
+          type: "students",
+        },
+      });
+      const adduser = await createUser.save();
+      res.status(201).json({ ok: true, message: "succesfull" });
+    } catch (error) {
+      res.status(200).json({ ok: false, message: `server error: ${error} ` });
+    }
+  },
+);
 
 module.exports = registrationRouter;
