@@ -3,6 +3,10 @@ const loginRouter = express.Router();
 const bcrypt = require("bcryptjs");
 const userData = require("../modules/studentUser");
 const jwt = require("jsonwebtoken");
+//middlewares
+const userValidation = require("../middlewares/userValidation");
+//api middlewares
+const apiValidation = require("../middlewares/apiValidation");
 //
 /*
 passwords :
@@ -56,7 +60,11 @@ loginRouter.post("/", validateReqBody, async (req, res) => {
         path: "/",
         maxAge: 1000 * 60 * 60 * 24 * 30, //up untill 30 days(a month)
       });
-      return res.status(200).json({ ok: true, message: "success" });
+      return res.status(200).json({
+        ok: true,
+        message: "success",
+        clientKey: process.env.CLIENT_KEY,
+      });
     }
     res.status(401).json({ ok: false, message: "wrong password" });
   } catch (error) {
@@ -64,39 +72,34 @@ loginRouter.post("/", validateReqBody, async (req, res) => {
   }
 });
 //
-loginRouter.get("/validate/", async (req, res) => {
-  try {
-    const token = req.cookies.token;
-    if (!token)
-      return res.status(401).json({
-        ok: false,
-        message: "access denied user not validated pls login",
-      });
-    const tokenData = await jwt.verify(token, process.env.ACCESS_TOKEN);
-    if (!tokenData)
-      return res
-        .status(401)
-        .json({ ok: false, message: "invalid session token pls login" });
-    const requst = await userData.find({ _id: tokenData._id });
-    if (requst.length === 0)
-      return res.status(404).json({ ok: false, message: "no records found" });
-    if (requst[0].role.code !== process.env.STUDENT_CODE)
-      return res.status(403).json({
-        ok: false,
-        message: "access denied user permissions not verified",
-      });
-    const respondsData = {
-      firstName: requst[0].firstName,
-      lastName: requst[0].lastName,
-      email: requst[0].email,
-      dateOfBirth: requst[0].dateOfBirth,
-    };
-    res
-      .status(200)
-      .json({ ok: true, message: "requst granted", userInfo: respondsData });
-  } catch (error) {
-    res.status(500).json({ ok: false, message: `server error: ${error} ` });
-  }
-});
+loginRouter.get(
+  "/validate/",
+  apiValidation,
+  userValidation,
+  async (req, res) => {
+    const tokenId = res.tokenId;
+    try {
+      const requst = await userData.find({ _id: tokenId });
+      if (requst.length === 0)
+        return res.status(404).json({ ok: false, message: "no records found" });
+      if (requst[0].role.code !== process.env.STUDENT_CODE)
+        return res.status(403).json({
+          ok: false,
+          message: "access denied user permissions not verified",
+        });
+      const respondsData = {
+        firstName: requst[0].firstName,
+        lastName: requst[0].lastName,
+        email: requst[0].email,
+        dateOfBirth: requst[0].dateOfBirth,
+      };
+      res
+        .status(200)
+        .json({ ok: true, message: "requst granted", userInfo: respondsData });
+    } catch (error) {
+      res.status(500).json({ ok: false, message: `server error: ${error} ` });
+    }
+  },
+);
 //
 module.exports = loginRouter;
