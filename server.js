@@ -30,13 +30,17 @@ moongose
 server.get("/", async (req, res) => {
   res.status(200).json({ ok: true });
 });
+
 //controllers
 const registrationRouter = require("./controllers/registration");
 const loginRouter = require("./controllers/login");
 const paymentRouter = require("./controllers/payment");
 const studentsDataRouter = require("./controllers/studentsData");
+const connnectionRouter = require("./controllers/connectionsAndChat");
+const connectionsRouter = require("./controllers/connectionsAndChat");
 //use controllers
 server.use("/register/user", registrationRouter);
 server.use("/signin/user", loginRouter);
 //server.use("/payment", paymentRouter);
 server.use("/students/", studentsDataRouter);
+server.use("/connection", connectionsRouter);

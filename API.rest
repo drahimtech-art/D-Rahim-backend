@@ -1,2 +1,22 @@
 ###
-GET 
+POST http://localhost:5000/register/user
+Content-Type: application/json
+
+{
+    "firstName" : "James",
+    "lastName" : "Will",
+    "email" : "jameswill24@gmail.com",
+    "password" : "1234",
+    "dateOfBirth" : "4/07/2004"
+}
+###
+POST http://localhost:5000/signin/user
+X-Frontend-Key: vkicwfrkn
+Content-Type: application/json
+
+
+{
+    "email" : "jameswill24@gmail.com",
+    "password" : "1234"
+    
+}
