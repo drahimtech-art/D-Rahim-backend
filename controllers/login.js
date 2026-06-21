@@ -92,6 +92,8 @@ loginRouter.get(
         lastName: requst[0].lastName,
         email: requst[0].email,
         dateOfBirth: requst[0].dateOfBirth,
+        phoneNumber: requst[0].phoneNumber,
+        bio: requst[0].bio,
       };
       res
         .status(200)
