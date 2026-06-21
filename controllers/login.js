@@ -102,4 +102,9 @@ loginRouter.get(
   },
 );
 //
+loginRouter.get("/logout", apiValidation, userValidation, async (req, res) => {
+  res.clearCookie("token");
+  res.status(200).json({ ok: true, message: "logout successful" });
+});
+//
 module.exports = loginRouter;
