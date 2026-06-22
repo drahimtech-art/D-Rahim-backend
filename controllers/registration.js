@@ -2,6 +2,7 @@ const express = require("express");
 const registrationRouter = express.Router();
 const bcrypt = require("bcryptjs");
 const userData = require("../modules/studentUser");
+const { randomUUID } = require("crypto");
 //
 const apiRequstValidation = require("../middlewares/apiValidation");
 //middle ware
@@ -106,6 +107,7 @@ registrationRouter.post(
         return res
           .status(403)
           .json({ ok: false, massage: "email already exist with records" });
+      const connectionId = randomUUID();
       const createUser = new userData({
         firstName: body.firstName,
         lastName: body.lastName,
@@ -114,6 +116,7 @@ registrationRouter.post(
         password: hashedPassword,
         phoneNumber: body.phoneNumber,
         bio: body.bio,
+        connectionId: connectionId,
         role: {
           code: process.env.STUDENT_CODE,
           type: "students",

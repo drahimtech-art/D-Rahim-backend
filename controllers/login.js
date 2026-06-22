@@ -34,12 +34,10 @@ function validateReqBody(req, res, next) {
   }
   const isEmailValid = validateEmail(email);
   if (!isEmailValid)
-    return res
-      .status(400)
-      .json({
-        ok: false,
-        message: "invalide requst, email address is not valid",
-      });
+    return res.status(400).json({
+      ok: false,
+      message: "invalide requst, email address is not valid",
+    });
   next();
 }
 loginRouter.post("/", validateReqBody, async (req, res) => {
@@ -109,6 +107,7 @@ loginRouter.get(
         dateOfBirth: requst[0].dateOfBirth,
         phoneNumber: requst[0].phoneNumber,
         bio: requst[0].bio,
+        connnectionId: requst[0].connectionId,
       };
       res
         .status(200)
