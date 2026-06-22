@@ -1,18 +1,23 @@
 const express = require("express");
-const server = express();
+const app = express();
+const http = require("http");
+const server = http.createServer(app);
 require("dotenv").config();
 const cors = require("cors");
 const cookieparesr = require("cookie-parser");
-server.use(cookieparesr());
-server.use(express.json());
-server.use(
+const SocketConnection = require("./controllers/socket");
+app.use(cookieparesr());
+app.use(express.json());
+app.use(
   cors({
     origin: [process.env.FRONTEND_URL_DEV, process.env.FRONTEND_URL],
     credentials: true,
   }),
 );
+//
+SocketConnection(server);
 const moongose = require("mongoose");
-server.use("/api/paystack/webhook", express.raw({ type: "application/json" }));
+app.use("/api/paystack/webhook", express.raw({ type: "application/json" }));
 const port = process.env.SERVER_PORT || 5000;
 //
 moongose
@@ -27,7 +32,7 @@ moongose
     console.log(error);
   });
 //test
-server.get("/", async (req, res) => {
+app.get("/", async (req, res) => {
   res.status(200).json({ ok: true });
 });
 
@@ -39,8 +44,8 @@ const studentsDataRouter = require("./controllers/studentsData");
 const connnectionRouter = require("./controllers/connectionsAndChat");
 const connectionsRouter = require("./controllers/connectionsAndChat");
 //use controllers
-server.use("/register/user", registrationRouter);
-server.use("/signin/user", loginRouter);
-//server.use("/payment", paymentRouter);
-server.use("/students/", studentsDataRouter);
-server.use("/connection", connectionsRouter);
+app.use("/register/user", registrationRouter);
+app.use("/signin/user", loginRouter);
+//app.use("/payment", paymentRouter);
+app.use("/students/", studentsDataRouter);
+app.use("/connection", connectionsRouter);
