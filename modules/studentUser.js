@@ -29,6 +29,10 @@ const userShema = new Schema({
     type: String,
     required: true,
   },
+  connectionId: {
+    type: String,
+    required: true,
+  },
   role: {
     code: {
       type: String,
