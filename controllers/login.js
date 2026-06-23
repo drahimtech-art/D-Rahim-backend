@@ -107,7 +107,7 @@ loginRouter.get(
         dateOfBirth: requst[0].dateOfBirth,
         phoneNumber: requst[0].phoneNumber,
         bio: requst[0].bio,
-        connnectionId: requst[0].connectionId,
+        connectionId: requst[0].connectionId,
         imageUrl: requst[0].imageUrl,
       };
       res
