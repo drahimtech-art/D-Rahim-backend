@@ -27,6 +27,13 @@ async function SocketConnection(serverPort) {
       validateClient(socket);
       //
       console.log(socket.id);
+      socket.on("join-room", (room) => {
+        console.log(`room ${room}`);
+        socket.join(room);
+      });
+      socket.on("send-message", (messages, room) => {
+        console.log(messages, room);
+      });
     } catch (error) {
       console.log(error);
     }
