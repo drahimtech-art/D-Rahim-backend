@@ -103,6 +103,9 @@ async function SocketConnection(serverPort) {
       socket.on("join-room", (room) => {
         socket.join(room);
       });
+      socket.on("leave-room", (room) => {
+        socket.leave(room);
+      });
       socket.on("send-message", (messages, room) => {
         const connectionId = messages.from;
         const contactId = messages.to;

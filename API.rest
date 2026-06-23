@@ -4,9 +4,9 @@ X-Frontend-Key: 86d18ffe-09a5-43ef-8008-608dc117c4f476dae630-f1c6-4379-b8da-f110
 Content-Type: application/json
 
 {
-    "firstName" : "Victory",
-    "lastName" : "Nwanoruo",
-    "email" : "nwanoruovictory@gmail.com",
+    "firstName" : "Henry",
+    "lastName" : "Jack",
+    "email" : "henryjack87@gmail.com",
     "password" : "1234",
     "dateOfBirth" : "07/14/2004",
     "phoneNumber": "08066859429",
@@ -22,4 +22,23 @@ Content-Type: application/json
     "email" : "nwanoruovictory87@gmail.com",
     "password" : "1234"
     
+}
+
+###
+POST  http://localhost:5000/connection/user/add/1ed0d6e0-267d-4e53-a000-77a637de42d5
+X-Frontend-Key: 86d18ffe-09a5-43ef-8008-608dc117c4f476dae630-f1c6-4379-b8da-f1106f6c1f50
+Content-Type: application/json
+
+{
+    "userId" : "6a39d2617f20f881079fe878"
+}
+
+###
+POST  http://localhost:5000/connection/contact/messages
+X-Frontend-Key: 86d18ffe-09a5-43ef-8008-608dc117c4f476dae630-f1c6-4379-b8da-f1106f6c1f50
+Content-Type: application/json
+
+{
+     "connectionId": "giuguihio",
+          "contactId": "contactId"
 }
