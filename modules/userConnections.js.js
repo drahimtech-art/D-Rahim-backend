@@ -19,7 +19,7 @@ const connnectionSchema = new Schema({
   },
   contactImage: {
     type: String,
-    required: true,
+    required: false,
   },
 });
 const userConnections = mongoose.model("userConnections", connnectionSchema);
