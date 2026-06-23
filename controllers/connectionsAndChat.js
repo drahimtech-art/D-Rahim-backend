@@ -73,7 +73,7 @@ connectionsRouter.post(
 );
 //get message history of contact/connections
 //req body middleware
-function validateReqBody(req, res, next) {
+async function validateReqBody(req, res, next) {
   try {
     const body = req.body;
     if (!body)
@@ -94,6 +94,8 @@ function validateReqBody(req, res, next) {
 }
 connectionsRouter.post(
   "/contact/messages",
+  apiRequstValidation,
+  userValdation,
   validateReqBody,
   async (req, res) => {
     try {
@@ -108,13 +110,15 @@ connectionsRouter.post(
         return res
           .status(404)
           .json({ ok: false, message: "No chat history found" });
-      res
-        .status(200)
-        .json({
-          ok: true,
-          message: "chat records retrived succesfull",
-          chatHistory: findChatHistory[0],
-        });
+      const respondsData = {
+        contactId: findChatHistory[0].contactId,
+        messages: findChatHistory[0].messages,
+      };
+      res.status(200).json({
+        ok: true,
+        message: "chat records retrived succesfull",
+        chatHistory: respondsData,
+      });
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error: ${error}` });
     }
