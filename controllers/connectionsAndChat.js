@@ -1,11 +1,12 @@
 const express = require("express");
 const connectionsRouter = express.Router();
 const userConnections = require("../modules/userConnections.js");
+const contactMessage = require("../modules/contactMessage.js");
 const userData = require("../modules/studentUser.js");
 //middlewares
 const apiRequstValidation = require("../middlewares/apiValidation.js");
 const userValdation = require("../middlewares/userValidation.js");
-//
+//get contacts/connections
 connectionsRouter.get(
   "/user/contacts",
   apiRequstValidation,
@@ -27,7 +28,7 @@ connectionsRouter.get(
     }
   },
 );
-//
+//add contacts/connnections
 connectionsRouter.post(
   "/user/add/:id",
   apiRequstValidation,
@@ -67,6 +68,55 @@ connectionsRouter.post(
     } catch (error) {
       console.log(`server error : ${error}`);
       res.status(500).json({ ok: false, message: `server error : ${error}` });
+    }
+  },
+);
+//get message history of contact/connections
+//req body middleware
+function validateReqBody(req, res, next) {
+  try {
+    const body = req.body;
+    if (!body)
+      return res
+        .status(400)
+        .json({ ok: false, message: "invalide requst body" });
+    const connectionId = body.connectionId;
+    const contactId = body.contactId;
+    if (!connectionId || !contactId)
+      return res
+        .status(400)
+        .json({ ok: false, message: "invalide requst body" });
+    res.body = body;
+    next();
+  } catch (error) {
+    res.status(500).json({ ok: false, message: `server error: ${error}` });
+  }
+}
+connectionsRouter.post(
+  "/contact/messages",
+  validateReqBody,
+  async (req, res) => {
+    try {
+      const body = res.body;
+      const connectionId = body.connectionId;
+      const contactId = body.contactId;
+      const findChatHistory = await contactMessage.find({
+        connectionId: connectionId,
+        contactId: contactId,
+      });
+      if (findChatHistory.length === 0)
+        return res
+          .status(404)
+          .json({ ok: false, message: "No chat history found" });
+      res
+        .status(200)
+        .json({
+          ok: true,
+          message: "chat records retrived succesfull",
+          chatHistory: findChatHistory[0],
+        });
+    } catch (error) {
+      res.status(500).json({ ok: false, message: `server error: ${error}` });
     }
   },
 );
