@@ -108,6 +108,7 @@ loginRouter.get(
         phoneNumber: requst[0].phoneNumber,
         bio: requst[0].bio,
         connnectionId: requst[0].connectionId,
+        imageUrl: requst[0].imageUrl,
       };
       res
         .status(200)

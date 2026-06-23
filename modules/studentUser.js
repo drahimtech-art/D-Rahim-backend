@@ -33,6 +33,10 @@ const userShema = new Schema({
     type: String,
     required: true,
   },
+  imageUrl: {
+    type: String,
+    required: false,
+  },
   role: {
     code: {
       type: String,

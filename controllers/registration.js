@@ -117,6 +117,7 @@ registrationRouter.post(
         phoneNumber: body.phoneNumber,
         bio: body.bio,
         connectionId: connectionId,
+        imageUrl: null,
         role: {
           code: process.env.STUDENT_CODE,
           type: "students",

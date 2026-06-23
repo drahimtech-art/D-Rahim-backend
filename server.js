@@ -41,7 +41,6 @@ const registrationRouter = require("./controllers/registration");
 const loginRouter = require("./controllers/login");
 const paymentRouter = require("./controllers/payment");
 const studentsDataRouter = require("./controllers/studentsData");
-const connnectionRouter = require("./controllers/connectionsAndChat");
 const connectionsRouter = require("./controllers/connectionsAndChat");
 //use controllers
 app.use("/register/user", registrationRouter);
