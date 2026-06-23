@@ -28,11 +28,11 @@ async function SocketConnection(serverPort) {
       //
       console.log(socket.id);
       socket.on("join-room", (room) => {
-        console.log(`room ${room}`);
         socket.join(room);
       });
       socket.on("send-message", (messages, room) => {
-        console.log(messages, room);
+        console.log(room);
+        socket.to(room).emit("receive-message", messages);
       });
     } catch (error) {
       console.log(error);
