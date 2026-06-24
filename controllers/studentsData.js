@@ -27,7 +27,7 @@ const validateReqBody = async (req, res, next) => {
   }
 };
 //
-studentsDataRouter.post(
+studentsDataRouter.put(
   "/update/user/info",
   apiRequstValidation,
   userValidation,
