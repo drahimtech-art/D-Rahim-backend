@@ -15,34 +15,16 @@ function validateClient(socket) {
 // save chat to db func
 async function saveForUserChatToDB(connectionId, contactId, message) {
   try {
-    const doesChatExist = await contactMessages.find({
+    const createChatData = new contactMessages({
       connectionId: connectionId,
       contactId: contactId,
+      messages: message,
     });
-    if (doesChatExist.length === 0) {
-      const createChatData = new contactMessages({
-        connectionId: connectionId,
-        contactId: contactId,
-        messages: [message],
-      });
-      const saveData = await createChatData.save();
-      if (saveData) {
-        console.log("Chat history created succesfull");
-      } else {
-        console.log("Chat history creation failed");
-      }
+    const saveData = await createChatData.save();
+    if (saveData) {
+      console.log("Chat history created succesfull");
     } else {
-      const oldMessages = doesChatExist[0].messages;
-      const newMessages = [...oldMessages, message];
-      const updateChat = await contactMessages.findOneAndUpdate(
-        { connectionId: connectionId, contactId: contactId },
-        { messages: newMessages },
-      );
-      if (updateChat) {
-        console.log("messages succesfull saved in chat history");
-      } else {
-        console.log("messages falied to save in chat history");
-      }
+      console.log("Chat history creation failed");
     }
   } catch (error) {
     console.log(`server error: ${error}`);
@@ -51,34 +33,16 @@ async function saveForUserChatToDB(connectionId, contactId, message) {
 //
 async function saveForConatactChatToDB(connectionId, contactId, message) {
   try {
-    const doesChatExist = await contactMessages.find({
+    const createChatData = new contactMessages({
       connectionId: contactId,
       contactId: connectionId,
+      messages: message,
     });
-    if (doesChatExist.length === 0) {
-      const createChatData = new contactMessages({
-        connectionId: contactId,
-        contactId: connectionId,
-        messages: [message],
-      });
-      const saveData = await createChatData.save();
-      if (saveData) {
-        console.log("Chat history created succesfull");
-      } else {
-        console.log("Chat history creation failed");
-      }
+    const saveData = await createChatData.save();
+    if (saveData) {
+      console.log("Chat history created succesfull");
     } else {
-      const oldMessages = doesChatExist[0].messages;
-      const newMessages = [...oldMessages, message];
-      const updateChat = await contactMessages.findOneAndUpdate(
-        { connectionId: contactId, contactId: connectionId },
-        { messages: newMessages },
-      );
-      if (updateChat) {
-        console.log("messages succesfull saved in chat history");
-      } else {
-        console.log("messages falied to save in chat history");
-      }
+      console.log("Chat history creation failed");
     }
   } catch (error) {
     console.log(`server error: ${error}`);

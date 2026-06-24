@@ -102,22 +102,34 @@ connectionsRouter.post(
       const body = res.body;
       const connectionId = body.connectionId;
       const contactId = body.contactId;
-      const findChatHistory = await contactMessage.find({
-        connectionId: connectionId,
-        contactId: contactId,
-      });
+      const findChatHistory = await contactMessage
+        .find({
+          connectionId: connectionId,
+          contactId: contactId,
+        })
+        .sort({ createdAt: 1 })
+        .limit(50);
       if (findChatHistory.length === 0)
         return res
           .status(404)
           .json({ ok: false, message: "No chat history found" });
-      const respondsData = {
-        contactId: findChatHistory[0].contactId,
-        messages: findChatHistory[0].messages,
-      };
+      const respondsList = await findChatHistory.map((e) => {
+        const dataFomart = {
+          from: e.messages.from,
+          to: e.messages.to,
+          type: e.messages.type,
+          imgUrl: e.messages.imgUrl,
+          date: e.messages.date,
+          time: e.messages.time,
+          text: e.messages.text,
+        };
+        return dataFomart;
+      });
+
       res.status(200).json({
         ok: true,
         message: "chat records retrived succesfull",
-        chatHistory: respondsData,
+        chatHistory: respondsList,
       });
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error: ${error}` });

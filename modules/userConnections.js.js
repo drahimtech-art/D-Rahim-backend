@@ -21,6 +21,8 @@ const connnectionSchema = new Schema({
     type: String,
     required: false,
   },
+  createdAt: { type: Date, default: Date.now },
 });
+connnectionSchema.index({ userId: 1, contactId: -1 });
 const userConnections = mongoose.model("userConnections", connnectionSchema);
 module.exports = userConnections;

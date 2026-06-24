@@ -90,25 +90,25 @@ loginRouter.get(
   async (req, res) => {
     const tokenId = res.tokenId;
     try {
-      const requst = await userData.find({ _id: tokenId });
-      if (requst.length === 0) {
+      const requst = await userData.findById({ _id: tokenId });
+      if (!requst) {
         res.clearCookie("token");
         return res.status(404).json({ ok: false, message: "no records found" });
       }
-      if (requst[0].role.code !== process.env.STUDENT_CODE)
+      if (requst.role.code !== process.env.STUDENT_CODE)
         return res.status(403).json({
           ok: false,
           message: "access denied user permissions not verified",
         });
       const respondsData = {
-        firstName: requst[0].firstName,
-        lastName: requst[0].lastName,
-        email: requst[0].email,
-        dateOfBirth: requst[0].dateOfBirth,
-        phoneNumber: requst[0].phoneNumber,
-        bio: requst[0].bio,
-        connectionId: requst[0].connectionId,
-        imageUrl: requst[0].imageUrl,
+        firstName: requst.firstName,
+        lastName: requst.lastName,
+        email: requst.email,
+        dateOfBirth: requst.dateOfBirth,
+        phoneNumber: requst.phoneNumber,
+        bio: requst.bio,
+        connectionId: requst.connectionId,
+        imageUrl: requst.imageUrl,
       };
       res
         .status(200)
