@@ -39,6 +39,6 @@ X-Frontend-Key: 86d18ffe-09a5-43ef-8008-608dc117c4f476dae630-f1c6-4379-b8da-f110
 Content-Type: application/json
 
 {
-     "connectionId": "giuguihio",
-          "contactId": "contactId"
+     "connectionId": "1ed0d6e0-267d-4e53-a000-77a637de42d5",
+          "contactId": "8531f3d4-ff8c-49dd-a157-115c9f83cc11"
 }
