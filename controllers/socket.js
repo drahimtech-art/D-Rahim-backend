@@ -30,6 +30,7 @@ async function saveForUserChatToDB(connectionId, contactId, message) {
     console.log(`server error: ${error}`);
   }
 }
+let socketApi;
 //
 async function saveForConatactChatToDB(connectionId, contactId, message) {
   try {
@@ -49,7 +50,15 @@ async function saveForConatactChatToDB(connectionId, contactId, message) {
   }
 }
 //
-async function SocketConnection(serverPort) {
+async function sendFileEvents(messages, room) {
+  if (!socketApi) return;
+  try {
+    socketApi.to(room).emit("receive-message", messages);
+  } catch (error) {
+    console.log(error);
+  }
+}
+function SocketConnection(serverPort) {
   const io = new Server(serverPort, {
     cors: {
       origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_DEV],
@@ -57,6 +66,7 @@ async function SocketConnection(serverPort) {
     },
   });
   //
+  socketApi = io;
   io.on("connection", async (socket) => {
     try {
       //middleware
@@ -82,4 +92,4 @@ async function SocketConnection(serverPort) {
     }
   });
 }
-module.exports = SocketConnection;
+module.exports = { SocketConnection, sendFileEvents };

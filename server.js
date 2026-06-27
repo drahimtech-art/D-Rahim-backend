@@ -5,7 +5,7 @@ const server = http.createServer(app);
 require("dotenv").config();
 const cors = require("cors");
 const cookieparesr = require("cookie-parser");
-const SocketConnection = require("./controllers/socket");
+const { SocketConnection } = require("./controllers/socket");
 app.use(cookieparesr());
 app.use(express.json());
 app.use(
@@ -14,6 +14,7 @@ app.use(
     credentials: true,
   }),
 );
+app.use(express.static("storage"));
 //
 SocketConnection(server);
 const moongose = require("mongoose");
