@@ -3,9 +3,13 @@ const connectionsRouter = express.Router();
 const userConnections = require("../modules/userConnections.js");
 const contactMessage = require("../modules/contactMessage.js");
 const userData = require("../modules/studentUser.js");
+const multer = require("multer");
+const path = require("path");
+const { sendFileEvents } = require("./socket.js");
 //middlewares
 const apiRequstValidation = require("../middlewares/apiValidation.js");
 const userValdation = require("../middlewares/userValidation.js");
+
 //get contacts/connections
 connectionsRouter.get(
   "/user/contacts",
@@ -92,6 +96,7 @@ async function validateReqBody(req, res, next) {
     res.status(500).json({ ok: false, message: `server error: ${error}` });
   }
 }
+//
 connectionsRouter.post(
   "/contact/messages",
   apiRequstValidation,
@@ -133,6 +138,75 @@ connectionsRouter.post(
       });
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error: ${error}` });
+    }
+  },
+);
+//
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "storage");
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}${path.extname(file.originalname)}`);
+  },
+});
+const uploadMiddleware = multer({ storage: storage });
+//middleware
+async function validateImageBody(data, req, res) {
+  try {
+    const body = data;
+    console.log(body);
+    if (!body)
+      return res
+        .status(400)
+        .json({ ok: false, message: "invalide requst body" });
+    if (!body.message || !body.room)
+      return res
+        .status(400)
+        .json({ ok: false, message: "invalide requst body" });
+    if (body.room.trim() === "")
+      return res.status(400).json({ ok: false, message: "invalide room " });
+    if (
+      !body.message.date ||
+      !body.message.from ||
+      !body.message.to ||
+      !body.message.imgUrl ||
+      !body.message.time ||
+      !body.message.type
+    )
+      return res
+        .status(400)
+        .json({ ok: false, message: "invalide requst body" });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: `server error : ${error}` });
+  }
+}
+//upload images
+connectionsRouter.post(
+  "/upload/file",
+  apiRequstValidation,
+  userValdation,
+  uploadMiddleware.single("image"),
+  async (req, res) => {
+    try {
+      const filename = req.file.filename;
+      const body = JSON.parse(req.body.message);
+      const oldMessage = body.message;
+      const room = body.room;
+      const updatedMessage = {
+        from: "1ed0d6e0-267d-4e53-a000-77a637de42d5",
+        to: "8531f3d4-ff8c-49dd-a157-115c9f83cc11",
+        type: "image",
+        imgUrl: `http://localhost:5000/${filename}`,
+        date: "06/27/2026",
+        time: "21:52",
+        text: "",
+      };
+      sendFileEvents(updatedMessage, room);
+      res.status(200).json({ ok: true, message: "succesfully uploaded" });
+      //sendFileEvents()
+    } catch (error) {
+      res.status(500).json({ ok: false, message: `server error : ${error}` });
     }
   },
 );

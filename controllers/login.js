@@ -8,12 +8,7 @@ const userValidation = require("../middlewares/userValidation");
 //api middlewares
 const apiValidation = require("../middlewares/apiValidation");
 //
-/*
-passwords :
-1: 12345,
-2: 54321
-3: 5421
-*/
+
 async function hashPassword(password) {
   const requst = await bcrypt.hash(password, 10);
   const result = requst;
