@@ -5,7 +5,6 @@ const server = http.createServer(app);
 require("dotenv").config();
 const cors = require("cors");
 const cookieparesr = require("cookie-parser");
-const { SocketConnection } = require("./controllers/socket");
 app.use(cookieparesr());
 app.use(express.json());
 app.use(
@@ -15,8 +14,12 @@ app.use(
   }),
 );
 app.use(express.static("storage"));
+const getServer = () => {
+  return server;
+};
+module.exports = getServer;
+const socket = require("./controllers/socket");
 //
-SocketConnection(server);
 const moongose = require("mongoose");
 app.use("/api/paystack/webhook", express.raw({ type: "application/json" }));
 const port = process.env.SERVER_PORT || 5000;

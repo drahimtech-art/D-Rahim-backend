@@ -1,6 +1,15 @@
 const { Server } = require("socket.io");
 const userValidation = require("jsonwebtoken");
 const contactMessages = require("../modules/contactMessage");
+const getServer = require("../server");
+const serverPort = getServer();
+//contect to socket
+const io = new Server(serverPort, {
+  cors: {
+    origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_DEV],
+    credentials: true,
+  },
+});
 
 //middleware
 function validateUser(socket) {
@@ -30,7 +39,6 @@ async function saveForUserChatToDB(connectionId, contactId, message) {
     console.log(`server error: ${error}`);
   }
 }
-let socketApi;
 //
 async function saveForConatactChatToDB(connectionId, contactId, message) {
   try {
@@ -51,45 +59,39 @@ async function saveForConatactChatToDB(connectionId, contactId, message) {
 }
 //
 async function sendFileEvents(messages, room) {
-  if (!socketApi) return;
+  if (!io) return;
   try {
-    socketApi.to(room).emit("receive-message", messages);
+    console.log(messages, room);
+    io.to(room).emit("receive-message", messages);
   } catch (error) {
     console.log(error);
   }
 }
-function SocketConnection(serverPort) {
-  const io = new Server(serverPort, {
-    cors: {
-      origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_DEV],
-      credentials: true,
-    },
-  });
-  //
-  socketApi = io;
-  io.on("connection", async (socket) => {
-    try {
-      //middleware
-      validateUser(socket);
-      validateClient(socket);
-      //
-      console.log(socket.id);
-      socket.on("join-room", (room) => {
-        socket.join(room);
-      });
-      socket.on("leave-room", (room) => {
-        socket.leave(room);
-      });
-      socket.on("send-message", (messages, room) => {
-        const connectionId = messages.from;
-        const contactId = messages.to;
-        saveForUserChatToDB(connectionId, contactId, messages);
-        saveForConatactChatToDB(connectionId, contactId, messages);
-        socket.to(room).emit("receive-message", messages);
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  });
-}
-module.exports = { SocketConnection, sendFileEvents };
+//
+
+io.on("connection", async (socket) => {
+  try {
+    //middleware
+    validateUser(socket);
+    validateClient(socket);
+    //
+    console.log(socket.id);
+    socket.on("join-room", (room) => {
+      socket.join(room);
+    });
+    socket.on("leave-room", (room) => {
+      socket.leave(room);
+    });
+    socket.on("send-message", (messages, room) => {
+      const connectionId = messages.from;
+      const contactId = messages.to;
+      saveForUserChatToDB(connectionId, contactId, messages);
+      saveForConatactChatToDB(connectionId, contactId, messages);
+      socket.to(room).emit("receive-message", messages);
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+module.exports = { sendFileEvents };
