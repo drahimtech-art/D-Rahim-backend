@@ -112,7 +112,7 @@ connectionsRouter.post(
           connectionId: connectionId,
           contactId: contactId,
         })
-        .sort({ createdAt: 1 })
+        .sort({ createdAt: -1 })
         .limit(50);
       if (findChatHistory.length === 0)
         return res
@@ -130,11 +130,11 @@ connectionsRouter.post(
         };
         return dataFomart;
       });
-
+      const reversedArray = respondsList.reverse();
       res.status(200).json({
         ok: true,
         message: "chat records retrived succesfull",
-        chatHistory: respondsList,
+        chatHistory: reversedArray,
       });
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error: ${error}` });
@@ -193,13 +193,14 @@ connectionsRouter.post(
       const body = JSON.parse(req.body.message);
       const oldMessage = body.message;
       const room = body.room;
+      console.log(room);
       const updatedMessage = {
-        from: "1ed0d6e0-267d-4e53-a000-77a637de42d5",
-        to: "8531f3d4-ff8c-49dd-a157-115c9f83cc11",
+        from: oldMessage.from,
+        to: oldMessage.to,
         type: "image",
         imgUrl: `http://localhost:5000/${filename}`,
-        date: "06/27/2026",
-        time: "21:52",
+        date: oldMessage.date,
+        time: oldMessage.time,
         text: "",
       };
       sendFileEvents(updatedMessage, room);
