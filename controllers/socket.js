@@ -85,7 +85,10 @@ async function saveForConatactChatToDB(connectionId, contactId, message) {
 async function sendFileEvents(messages, room) {
   if (!io) return;
   try {
-    console.log(messages, room);
+    const connectionId = messages.from;
+    const contactId = messages.to;
+    saveForUserChatToDB(connectionId, contactId, messages);
+    saveForConatactChatToDB(connectionId, contactId, messages);
     io.to(room).emit("receive-message", messages);
   } catch (error) {
     console.log(error);
