@@ -1,6 +1,7 @@
 const express = require("express");
 const studentsDataRouter = express.Router();
 const userData = require("../modules/studentUser");
+const userConnections = require("../modules/userConnections.js");
 const multer = require("multer");
 const path = require("path");
 //middlewares
@@ -103,14 +104,30 @@ studentsDataRouter.put(
           userInfo: userInfo,
         });
       }
+      const updatedImage = isImage
+        ? imageUrl
+        : isUserInRecords.imageUrl
+          ? isUserInRecords.imageUrl
+          : null;
       const updateData = await userData.findByIdAndUpdate(userId, {
         firstName: firstName,
         lastName: lastName,
         dateOfBirth: dateOfBirth,
         phoneNumber: phoneNumber,
         bio: bio,
-        imageUrl: isImage ? imageUrl : null,
+        imageUrl: updatedImage,
       });
+      const updateUsersConnectionDataOfUser = await userConnections.updateMany(
+        {
+          contactId: isUserInRecords.connectionId,
+        },
+        {
+          contactFirstName: firstName,
+          contactLastName: lastName,
+          contactImage: updatedImage,
+        },
+      );
+      console.log(updateUsersConnectionDataOfUser);
       if (!updateData) throw new Error("Somting went wrong will updating user");
       const userInfo = {
         firstName: firstName,
