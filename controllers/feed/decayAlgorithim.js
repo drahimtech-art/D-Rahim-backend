@@ -199,7 +199,7 @@ const feeds = [
       ],
       views: 577,
     },
-    postId: "98x3fr892mmp8s423",
+    postId: "98x3fr8928o6mmp8s423",
     hashTages: ["#dev", "#full-stackdev", "#god", "#codewithvictory"],
     date: "2024/02/28",
     time: "02:54",
@@ -301,7 +301,7 @@ const feeds = [
       ],
       views: 577,
     },
-    postId: "98x3fr892mmp8s423",
+    postId: "98x3fr892miigmp8s423",
     hashTages: ["#dev", "#full-stackdev", "#job", "#codewithvictory"],
     date: "2024/02/28",
     time: "02:54",
@@ -413,22 +413,20 @@ function getPostAge(post) {
   return daysPassed;
 }
 
-const result = feeds.map((e) => {
-  const daysPassed = getPostAge(e);
+function decayStats(post) {
+  const daysPassed = getPostAge(post);
   const createdAtHalfLife = 7;
-  const likesScore = e.engament.likes * 1.0;
-  const viewsScore = e.engament.views * 0.8;
-  const commentScore = e.engament.comments * 0.3;
+  const likesScore = post.engament.likes * 0.7;
+  const viewsScore = post.engament.views * 0.3;
+  const commentScore = post.engament.comments * 0.5;
   const agedScore = 100 * Math.pow(0.5, daysPassed / createdAtHalfLife);
   const engamentScore = likesScore + viewsScore + commentScore;
   const result = {
-    connectionId: e.author.connectionId,
-    agedScore: agedScore,
-    engamentScore: engamentScore,
+    ...post,
     totalScore: agedScore * engamentScore,
   };
   return result;
-});
+}
 
 function feedsAlgorithim() {
   const feedsList = [];
@@ -539,9 +537,75 @@ function feedsAlgorithim() {
       }
     }
   }
-  console.log(topHalfConnectionsIds);
+  //get post by user glopalConnectionsMedia
+  const topHalfGlobalConnectionsIds = [];
+  const orderGlobalConnectionsRate = [];
+  //
+  if (
+    globalConnectionsMedia.length !== 0 &&
+    globalConnectionsMedia.length > 1
+  ) {
+    const conncetionsRateResult = [];
+    const result = globalConnectionsMedia.sort((a, b) => {
+      return a.rate - b.rate;
+    });
+    const revaseResults = result.reverse();
+    for (const rate of revaseResults) {
+      orderGlobalConnectionsRate.push(rate);
+    }
+  } else {
+    for (const rate of globalConnectionsMedia) {
+      orderGlobalConnectionsRate.push(rate);
+    }
+  }
+  //
+  if (orderGlobalConnectionsRate.length > 10) {
+    let totalHalf = 0;
+    const half = (orderGlobalConnectionsRate.length / 2).toString().split(".");
+    if (half.length > 1) {
+      totalHalf = Number(half[0]);
+    } else {
+      totalHalf = Number(half);
+    }
+    //push to topHalfConnectionsIds of User
+    for (let i = 0; i < totalHalf; i++) {
+      topHalfGlobalConnectionsIds.push(orderGlobalConnectionsRate[i].tag);
+    }
+  } else if (orderGlobalConnectionsRate.length !== 0) {
+    for (const connections of orderGlobalConnectionsRate) {
+      topHalfGlobalConnectionsIds.push(connections);
+    }
+  }
+  //
+  if (topHalfGlobalConnectionsIds.length != 0) {
+    for (const connection of topHalfGlobalConnectionsIds) {
+      for (const feed of feeds) {
+        if (
+          feed.author.connectionId === connection.connectionId &&
+          !postIds.includes(feed.postId)
+        ) {
+          feedsList.push(feed);
+          postIds.push(feed.postId);
+          break;
+        }
+      }
+    }
+  }
+  //console.log(topHalfConnectionsIds);
+  //console.log(topHalfGlobalConnectionsIds);
   // console.log(orderTagsRate);
   //console.log(topHalfHashTagsOfUser);
-  console.log(feedsList);
+  //console.log(feedsList);
+  //get decay score
+  const decayedFeedsList = [];
+  const decayScoresPost = [];
+  for (const post of feedsList) {
+    const score = decayStats(post);
+    decayScoresPost.push(score);
+  }
+  const sortByScore = decayScoresPost.sort((a, b) => {
+    return b.totalScore - a.totalScore;
+  });
+  console.log(sortByScore);
 }
 feedsAlgorithim();
