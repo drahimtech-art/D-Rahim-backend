@@ -7,33 +7,6 @@ const path = require("path");
 //middlewares
 const apiRequstValidation = require("../middlewares/apiValidation");
 const userValidation = require("../middlewares/userValidation");
-/*
-const validateReqBody = async (bodyData, req, res) => {
-  //console.log(res);
-  return;
-  try {
-    const body = bodyData;
-    if (!body)
-      return res
-        .status(400)
-        .json({ ok: false, message: "invalid requst body" });
-    const firstName = req.body.firstName;
-    const lastName = req.body.lastName;
-    const dateOfBirth = req.body.dateOfBirth;
-    const phoneNumber = req.body.phoneNumber;
-    const bio = req.body.bio;
-    if (!firstName || !lastName || !dateOfBirth || !phoneNumber || !bio)
-      return res
-        .status(400)
-        .json({ ok: false, message: "invalid requst body" });
-    return true;
-  } catch (error) {
-    res.status(500).json({ ok: false, message: `server error : ${error}` });
-    console.log(error);
-    return false;
-  }
-};
-*/
 //multer middleware
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -82,6 +55,11 @@ studentsDataRouter.put(
       const oldPhoneNumber = isUserInRecords.phoneNumber;
       const oldDateOfBirth = isUserInRecords.dateOfBirth;
       const oldBio = isUserInRecords.bio;
+      const updatedImage = isImage
+        ? imageUrl
+        : isUserInRecords.imageUrl
+          ? isUserInRecords.imageUrl
+          : null;
       if (
         oldFirstName === firstName &&
         oldLastName === lastName &&
@@ -96,7 +74,7 @@ studentsDataRouter.put(
           dateOfBirth: dateOfBirth,
           phoneNumber: phoneNumber,
           bio: bio,
-          imageUrl: isImage ? imageUrl : null,
+          imageUrl: updatedImage,
         };
         return res.status(303).json({
           ok: true,
@@ -104,11 +82,6 @@ studentsDataRouter.put(
           userInfo: userInfo,
         });
       }
-      const updatedImage = isImage
-        ? imageUrl
-        : isUserInRecords.imageUrl
-          ? isUserInRecords.imageUrl
-          : null;
       const updateData = await userData.findByIdAndUpdate(userId, {
         firstName: firstName,
         lastName: lastName,
@@ -127,7 +100,6 @@ studentsDataRouter.put(
           contactImage: updatedImage,
         },
       );
-      console.log(updateUsersConnectionDataOfUser);
       if (!updateData) throw new Error("Somting went wrong will updating user");
       const userInfo = {
         firstName: firstName,
@@ -135,7 +107,7 @@ studentsDataRouter.put(
         dateOfBirth: dateOfBirth,
         phoneNumber: phoneNumber,
         bio: bio,
-        imageUrl: isImage ? imageUrl : null,
+        imageUrl: updatedImage,
       };
       res.status(200).json({
         ok: true,
