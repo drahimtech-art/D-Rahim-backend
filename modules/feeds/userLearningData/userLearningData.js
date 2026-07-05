@@ -22,7 +22,20 @@ const userLearningSchema = new Schema({
       type: Array,
       require: true,
     },
-    type: Object,
+    type: {
+      hashTages: {
+        type: Array,
+        require: true,
+      },
+      connectionsMedia: {
+        type: Array,
+        require: true,
+      },
+      globalConnectionsMedia: {
+        type: Array,
+        require: true,
+      },
+    },
     require: true,
   },
 });
