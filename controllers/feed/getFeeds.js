@@ -1,11 +1,12 @@
 const express = require("express");
 const mediaFeeds = express.Router();
-const userLeaingData = require("../../modules/feeds/userLearningData/userLearningData");
-const feedsPosts = require("../../modules/feeds/post");
+const userLeaingData = require("../../modules/feeds/userLearningData/userLearningData.js");
+const feedsPosts = require("../../modules/feeds/post.js");
 //middlewares
 const apiRequstValidation = require("../../middlewares/apiValidation.js");
 const userValdation = require("../../middlewares/userValidation.js");
-
+//decay algorithim and states
+const decayStats = require("./decayAlgorithim.js");
 //get post by user intreast
 async function getPostByUserIntrest(userFeedsData, res) {
   try {
@@ -113,7 +114,6 @@ async function getPostByUserIntrest(userFeedsData, res) {
             if (!postIds.includes(feed.postId)) {
               feedsList.push(feed);
               postIds.push(feed.postId);
-              break;
             }
           }
         }
@@ -170,23 +170,28 @@ async function getPostByUserIntrest(userFeedsData, res) {
             if (!postIds.includes(feed.postId)) {
               feedsList.push(feed);
               postIds.push(feed.postId);
-              break;
             }
           }
         }
       }
     }
     const userIntreastList = {
-      feedsList: feedsList,
-      postIds: postIds,
+      feedsList: [...feedsList],
+      postIds: [...postIds],
+      pass: true,
     };
     return userIntreastList;
   } catch (error) {
     res.status(500).json({ ok: false, message: `server error ${error}` });
+    console.log(`server error ${error}`);
+    const userIntreastList = {
+      pass: false,
+    };
+    return userIntreastList;
   }
 }
 
-mediaFeeds.get("/post/content", async (req, res) => {
+mediaFeeds.get("/content", async (req, res) => {
   try {
     const userId = req.body.userId;
     const connectionId = req.body.connectionId;
@@ -194,26 +199,51 @@ mediaFeeds.get("/post/content", async (req, res) => {
       userId: userId,
       connectionId: connectionId,
     });
-    const feedsList = [];
-    const postIds = [];
-    //
-
-    //console.log(topHalfConnectionsIds);
-    //console.log(topHalfGlobalConnectionsIds);
-    // console.log(orderTagsRate);
-    //console.log(topHalfHashTagsOfUser);
-    //console.log(feedsList);
-    //get decay score
-    const decayedFeedsList = [];
-    const decayScoresPost = [];
-    for (const post of feedsList) {
-      const score = decayStats(post);
-      decayScoresPost.push(score);
+    let feedsList = [];
+    let postIds = [];
+    //get feeds by user intresst
+    if (
+      userFeedsData.length !== 0 &&
+      (userFeedsData[0].mediaIntaractions.connectionsMedia.length !== 0 ||
+        userFeedsData[0].mediaIntaractions.globalConnectionsMedia.length !==
+          0 ||
+        userFeedsData[0].mediaIntaractions.hashTages.length !== 0)
+    ) {
+      const data = await getPostByUserIntrest(userFeedsData, res);
+      if (!data.pass) return;
+      feedsList = [...feedsList, data.feedsList];
+      postIds = [...feedsList, data.postIds];
     }
-    const sortByScore = decayScoresPost.sort((a, b) => {
-      return b.totalScore - a.totalScore;
-    });
-    console.log(sortByScore);
+    //get global feeds
+    const globalPostLimits = feedsList.length > 50 ? 100 : 150;
+    const feeds = await feedsPosts
+      .find({ createdAt: -1 })
+      .limit(globalPostLimits);
+    if (feeds.length !== 0) {
+      for (const feed of feeds) {
+        if (!postIds.includes(feed.postId)) {
+          feedsList.push(feed);
+          postIds.push(feed.postId);
+        }
+      }
+    }
+    let decayedFeedsList = [];
+    const decayScoresPost = [];
+    if (feedsList.length !== 0) {
+      for (const post of feedsList) {
+        const score = decayStats(post);
+        decayScoresPost.push(score);
+      }
+      const sortByScore = decayScoresPost.sort((a, b) => {
+        return b.totalScore - a.totalScore;
+      });
+      if (sortByScore.length !== 0) {
+        decayedFeedsList = [...sortByScore];
+      }
+    }
+    res
+      .status(200)
+      .json({ ok: true, message: "succesfull", feeds: decayedFeedsList });
   } catch (error) {
     res.status(500).json({ ok: false, message: `server error ${error}` });
   }
