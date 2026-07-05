@@ -2,6 +2,7 @@ const express = require("express");
 const registrationRouter = express.Router();
 const bcrypt = require("bcryptjs");
 const userData = require("../modules/studentUser");
+const userFeedsLeaingData = require("../modules/feeds/userLearningData/userLearningData");
 const { randomUUID } = require("crypto");
 //
 const apiRequstValidation = require("../middlewares/apiValidation");
@@ -123,7 +124,19 @@ registrationRouter.post(
           type: "students",
         },
       });
-      const adduser = await createUser.save();
+      const addUser = await createUser.save();
+      if (!addUser) throw new Error(addUser);
+      const creatUserFeedsLearingData = new userFeedsLeaingData({
+        connectionId: addUser.connectionId,
+        userId: addUser._id,
+        mediaIntaractions: {
+          hashTages: [],
+          connectionsMedia: [],
+          globalConnectionsMedia: [],
+        },
+      });
+      const saveUserLeaingData = await creatUserFeedsLearingData.save();
+
       res.status(201).json({ ok: true, message: "succesfull" });
     } catch (error) {
       res.status(200).json({ ok: false, message: `server error: ${error} ` });

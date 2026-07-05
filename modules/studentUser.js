@@ -50,7 +50,7 @@ const userShema = new Schema({
     required: true,
   },
 });
-userShema.index({ email: 1, connectionId: 1 });
+userShema.index({ email: 1, connectionId: -1 });
 userShema.index({ connectionId: 1 });
 const studentInfor = mongoose.model("studentsInfo", userShema);
 module.exports = studentInfor;

@@ -1,12 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const postSchema = new Schema({
-  author: {
-    connectionId: {
-      type: String,
-      require: true,
-    },
-    type: Object,
+  connectionId: {
+    type: String,
     require: true,
   },
   engament: {
@@ -71,6 +67,8 @@ const postSchema = new Schema({
   },
   createdAt: { type: Date, require: true, default: Date.now },
 });
-
+postSchema.index({ connectionId: 1, postId: 1, createdAt: -1 });
+postSchema.index({ hashTages: 1, createdAt: -1 });
+postSchema.index({ createdAt: 1 });
 const postData = mongoose.model("feedPost", postSchema);
 module.exports = postData;

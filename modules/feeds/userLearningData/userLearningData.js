@@ -26,6 +26,8 @@ const userLearningSchema = new Schema({
     require: true,
   },
 });
+userLearningSchema.index({ userId: 1, connectionId: -1 });
+userLearningSchema.index({ connectionId: -1 });
 const userLearningData = mongoose.model(
   "feedsUserLearingData",
   userLearningSchema,
