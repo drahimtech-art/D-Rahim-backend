@@ -106,10 +106,10 @@ function decayStats(post) {
   const daysPassed = getPostAge(post);
   const createdAtHalfLife = 7;
   const likesScore = post.engament.likes * 0.3;
-  const viewsScore = post.engament.shares * 0.7;
+  const shares = post.engament.shares * 0.7;
   const commentScore = post.engament.comments * 0.5;
   const agedScore = 100 * Math.pow(0.5, daysPassed / createdAtHalfLife);
-  const engamentScore = likesScore + viewsScore + commentScore;
+  const engamentScore = likesScore + shares + commentScore;
   const result = {
     ...post,
     totalScore: agedScore * engamentScore,
