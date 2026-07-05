@@ -58,7 +58,8 @@ async function getPostByUserIntrest(userFeedsData, res) {
           hashTages: { $in: topHalfHashTagsOfUser },
           createdAt: -1,
         })
-        .limit(50);
+        .limit(20)
+        .lean();
       if (feeds.length !== 0) {
         for (const feed of feeds) {
           if (!postId.includes(feed.postId)) {
@@ -108,7 +109,8 @@ async function getPostByUserIntrest(userFeedsData, res) {
       for (const connection of topHalfConnectionsIds) {
         const feeds = await feedsPosts
           .find({ connectionId: connection, createdAt: -1 })
-          .limit(5);
+          .limit(5)
+          .lean();
         if (feeds.length !== 0) {
           for (const feed of feeds) {
             if (!postIds.includes(feed.postId)) {
@@ -164,7 +166,8 @@ async function getPostByUserIntrest(userFeedsData, res) {
       for (const connection of topHalfGlobalConnectionsIds) {
         const feeds = await feedsPosts
           .find({ connectionId: connection, createdAt: -1 })
-          .limit(30);
+          .limit(5)
+          .lean();
         if (feeds.length !== 0) {
           for (const feed of feeds) {
             if (!postIds.includes(feed.postId)) {
@@ -216,9 +219,12 @@ mediaFeeds.get("/content", async (req, res) => {
     }
     //get global feeds
     const globalPostLimits = feedsList.length > 50 ? 100 : 150;
-    const feeds = await feedsPosts
-      .find({ createdAt: -1 })
-      .limit(globalPostLimits);
+    const posts = await feedsPosts
+      .find()
+      .sort({ createdAt: -1 })
+      .limit(globalPostLimits)
+      .lean();
+    const feeds = posts;
     if (feeds.length !== 0) {
       for (const feed of feeds) {
         if (!postIds.includes(feed.postId)) {
@@ -231,14 +237,24 @@ mediaFeeds.get("/content", async (req, res) => {
     const decayScoresPost = [];
     if (feedsList.length !== 0) {
       for (const post of feedsList) {
-        const score = decayStats(post);
-        decayScoresPost.push(score);
+        const score = await decayStats(post);
+        if (score) {
+          decayScoresPost.push(score);
+        }
       }
-      const sortByScore = decayScoresPost.sort((a, b) => {
-        return b.totalScore - a.totalScore;
-      });
-      if (sortByScore.length !== 0) {
-        decayedFeedsList = [...sortByScore];
+      if (decayScoresPost.length !== 0) {
+        const sortByScore = decayScoresPost.sort((a, b) => {
+          return b.totalScore - a.totalScore;
+        });
+        if (sortByScore.length !== 0) {
+          const filtedList = [];
+          for (const post of sortByScore) {
+            const data = { ...post };
+            delete data.totalScore;
+            filtedList.push(data);
+          }
+          decayedFeedsList = [...filtedList];
+        }
       }
     }
     res
