@@ -24,22 +24,11 @@ function validateClient(socket) {
 // save chat to db func
 async function saveForUserChatToDB(connectionId, contactId, message) {
   try {
-    const [month, day, year] = message.date.split("/");
-    const [hour, minute] = message.time.split(":");
-    const isoDate = new Date(
-      Date.UTC(
-        Number(year),
-        Number(month) - 1,
-        Number(day),
-        Number(hour),
-        Number(minute),
-      ),
-    );
     const createChatData = new contactMessages({
       connectionId: connectionId,
       contactId: contactId,
       messages: message,
-      createdAt: isoDate,
+      createdAt: new Date(),
     });
     const saveData = await createChatData.save();
     if (saveData) {
@@ -54,22 +43,11 @@ async function saveForUserChatToDB(connectionId, contactId, message) {
 //
 async function saveForConatactChatToDB(connectionId, contactId, message) {
   try {
-    const [month, day, year] = message.date.split("/");
-    const [hour, minute] = message.time.split(":");
-    const isoDate = new Date(
-      Date.UTC(
-        Number(year),
-        Number(month) - 1,
-        Number(day),
-        Number(hour),
-        Number(minute),
-      ),
-    );
     const createChatData = new contactMessages({
       connectionId: contactId,
       contactId: connectionId,
       messages: message,
-      createdAt: isoDate,
+      createdAt: new Date(),
     });
     const saveData = await createChatData.save();
     if (saveData) {
