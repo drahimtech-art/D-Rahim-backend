@@ -1,6 +1,6 @@
 function getPostAge(post) {
   const data = { ...post };
-  const postDate = data.createdAt.split("T");
+  const postDate = data.createdAt.toISOString().split("T");
   const [postYear, postMonth, postDay] = postDate[0].split("-");
   const [postHour, postMinites, postSeconds] = postDate[1].split(":");
   const currentDate = new Date();
@@ -102,7 +102,8 @@ function getPostAge(post) {
   return daysPassed;
 }
 
-function decayStats(post) {
+function decayStats(p) {
+  const post = { ...p };
   const daysPassed = getPostAge(post);
   const createdAtHalfLife = 7;
   const likesScore = post.engament.likes * 0.3;
