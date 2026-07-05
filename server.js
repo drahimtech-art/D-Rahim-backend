@@ -46,9 +46,11 @@ const loginRouter = require("./controllers/login");
 const paymentRouter = require("./controllers/payment");
 const studentsDataRouter = require("./controllers/studentsData");
 const connectionsRouter = require("./controllers/connectionsAndChat");
+const getFeeds = require("./controllers/feed/getFeeds");
 //use controllers
 app.use("/register/user", registrationRouter);
 app.use("/signin/user", loginRouter);
 //app.use("/payment", paymentRouter);
 app.use("/students/", studentsDataRouter);
 app.use("/connection", connectionsRouter);
+app.use("/feeds/get", getFeeds);

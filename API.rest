@@ -42,3 +42,6 @@ Content-Type: application/json
      "connectionId": "1ed0d6e0-267d-4e53-a000-77a637de42d5",
           "contactId": "8531f3d4-ff8c-49dd-a157-115c9f83cc11"
 }
+
+###
+GET  http://localhost:5000/feeds/get/content

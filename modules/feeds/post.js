@@ -14,7 +14,7 @@ const postSchema = new Schema({
       type: Number,
       require: true,
     },
-    views: {
+    shares: {
       type: Number,
       require: true,
     },

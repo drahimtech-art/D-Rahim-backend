@@ -193,8 +193,8 @@ async function getPostByUserIntrest(userFeedsData, res) {
 
 mediaFeeds.get("/content", async (req, res) => {
   try {
-    const userId = req.body.userId;
-    const connectionId = req.body.connectionId;
+    const userId = "6a4a53e7e32a0f8e61531be8";
+    const connectionId = "1fa6df25-5545-429b-94a5-dd6f3052d07c";
     const userFeedsData = await userLeaingData.find({
       userId: userId,
       connectionId: connectionId,
