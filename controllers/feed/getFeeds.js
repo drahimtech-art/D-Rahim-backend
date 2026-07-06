@@ -2,6 +2,7 @@ const express = require("express");
 const mediaFeeds = express.Router();
 const userLeaingData = require("../../modules/feeds/userLearningData/userLearningData.js");
 const feedsPosts = require("../../modules/feeds/post.js");
+const userData = require("../../modules/studentUser.js");
 //middlewares
 const apiRequstValidation = require("../../middlewares/apiValidation.js");
 const userValdation = require("../../middlewares/userValidation.js");
@@ -208,12 +209,10 @@ mediaFeeds.get(
     try {
       const connectionId = req.params.id;
       if (!connectionId)
-        return res
-          .status(400)
-          .json({
-            ok: false,
-            message: `invalide requst params connection id is required`,
-          });
+        return res.status(400).json({
+          ok: false,
+          message: `invalide requst params connection id is required`,
+        });
       const userId = "6a4a53e7e32a0f8e61531be8";
       const userFeedsData = await userLeaingData.find({
         userId: userId,
@@ -316,6 +315,40 @@ mediaFeeds.get(
         .json({ ok: true, message: "succesfull", feeds: decayedFeedsList });
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error ${error}` });
+    }
+  },
+);
+//get post author info
+mediaFeeds.get(
+  "/author/info/:id",
+  apiRequstValidation,
+  validateUser,
+  async (req, res) => {
+    try {
+      const connectionId = req.params.id;
+      if (!connectionId)
+        return res.status(400).json({
+          ok: false,
+          message: "invalid requst params author connection id is required",
+        });
+      const findAuthor = await userData.find({ connectionId: connectionId });
+      if (findAuthor.length === 0)
+        return res.status(404).json({
+          ok: false,
+          message: "the requsted author not found in records",
+        });
+      const responds = {
+        firstName: findAuthor[0].firstName,
+        lastName: findAuthor[0].lastName,
+        profileImg: findAuthor[0].imageUrl,
+        bio: findAuthor[0].bio,
+      };
+      res
+        .status(200)
+        .json({ ok: true, message: "succesful", author: responds });
+    } catch (error) {
+      res.status(500).json({ ok: false, message: `server error: ${error}` });
+      console.log(`server error: ${error}`);
     }
   },
 );

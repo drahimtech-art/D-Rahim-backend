@@ -52,6 +52,6 @@ Content-Type: application/json
 
 {
     "connectionId" :  "1fa6df25-5545-429b-94a5-dd6f3052d07c",
-    "hashTages" : ["#dev", "#javascript", "full-stack"], 
-    "contentCaption" :"first test post"
+    "hashTages" : ["#html", "#java", "#webdev"], 
+    "caption" :"blah blah"
 }
