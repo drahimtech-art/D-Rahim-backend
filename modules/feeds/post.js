@@ -18,7 +18,20 @@ const postSchema = new Schema({
       type: Number,
       require: true,
     },
-    type: Object,
+    type: {
+      likes: {
+        type: Number,
+        require: true,
+      },
+      comments: {
+        type: Number,
+        require: true,
+      },
+      shares: {
+        type: Number,
+        require: true,
+      },
+    },
     require: true,
   },
   content: {
@@ -78,6 +91,6 @@ const postSchema = new Schema({
 });
 postSchema.index({ connectionId: 1, postId: 1, createdAt: -1 });
 postSchema.index({ hashTages: 1, createdAt: -1 });
-postSchema.index({ createdAt: 1 });
+postSchema.index({ engament: 1, createdAt: -1 });
 const postData = mongoose.model("feedPost", postSchema);
 module.exports = postData;

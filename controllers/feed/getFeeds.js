@@ -53,7 +53,7 @@ async function getPostByUserIntrest(userFeedsData, res) {
         topHalfHashTagsOfUser.push(tages.tag);
       }
     }
-    // get post bay hastags
+    // get post by hastags
     if (topHalfHashTagsOfUser.length !== 0) {
       const feeds = await feedsPosts
         .find({
@@ -229,9 +229,22 @@ mediaFeeds.get("/content", async (req, res) => {
       userConnectionId = data.userConnectionId;
     }
     //get global feeds
-    const globalPostLimits = feedsList.length > 50 ? 150 : 200;
+    const globalPostLimits = feedsList.length > 100 ? 300 : 500;
+    const TWO_WEEKS_AGO = new Date(new Date() - 14 * 24 * 60 * 60 * 1000);
+    const THREE_DAYS_AGO = new Date(new Date() - 3 * 24 * 60 * 60 * 1000);
     const posts = await feedsPosts
-      .find()
+      .find({
+        $or: [
+          {
+            createdAt: { $gte: TWO_WEEKS_AGO },
+          },
+          {
+            createdAt: { $gte: THREE_DAYS_AGO },
+            "engament.likes": { $gte: 50 },
+            "engament.shares": { $gte: 10 },
+          },
+        ],
+      })
       .sort({ createdAt: -1 })
       .limit(globalPostLimits)
       .lean();
@@ -272,7 +285,17 @@ mediaFeeds.get("/content", async (req, res) => {
             filtedList.push(data);
             count += 1;
           }
-          decayedFeedsList = [...filtedList];
+          // suffle result
+          function shuffle(list) {
+            const l = [...list];
+            for (let i = l.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [l[i], l[j]] = [l[j], l[i]];
+            }
+            return l;
+          }
+          const shuffledFeeds = shuffle(filtedList);
+          decayedFeedsList = [...shuffledFeeds];
         }
       }
     }

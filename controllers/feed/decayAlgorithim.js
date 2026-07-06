@@ -121,31 +121,30 @@ function decayStats(p, gc, fc, uc) {
     globalConnections.length !== 0 &&
     globalConnections.includes(post.connectionId)
   ) {
-    friendsOrGlobalConnectionsScore = 5;
+    friendsOrGlobalConnectionsScore = 1.5;
   } else if (
     friendsConnections.length !== 0 &&
     friendsConnections.includes(post.connectionId)
   ) {
     // else if post is from user friends connection
-    friendsOrGlobalConnectionsScore = 10;
+    friendsOrGlobalConnectionsScore = 3;
   }
   let totalScore = 0;
   if (friendsOrGlobalConnectionsScore !== 0) {
     //added it up with to totalscore if its from user intreast
-    totalScore = agedScore + engamentScore * friendsOrGlobalConnectionsScore;
+    totalScore = (agedScore + engamentScore) * friendsOrGlobalConnectionsScore;
   } else {
     totalScore = agedScore + engamentScore;
-    console.log("else");
   }
   if (userConnectionId) {
     if (post.engamentStates.likesId.includes(userConnectionId)) {
-      totalScore = totalScore / 1.5;
+      totalScore *= 0.8;
     }
   }
   console.log(`${totalScore}: total`);
   const result = {
     ...post,
-    totalScore: totalScore,
+    totalScore: Math.max(totalScore, 0.1),
   };
   return result;
 }
