@@ -102,18 +102,50 @@ function getPostAge(post) {
   return daysPassed;
 }
 
-function decayStats(p) {
+function decayStats(p, gc, fc, uc) {
   const post = { ...p };
+  const globalConnections = [...gc];
+  const friendsConnections = [...fc];
+  const userConnectionId = uc;
   const daysPassed = getPostAge(post);
   const createdAtHalfLife = 7;
   const likesScore = post.engament.likes * 0.3;
   const shares = post.engament.shares * 0.7;
   const commentScore = post.engament.comments * 0.5;
   const agedScore = 100 * Math.pow(0.5, daysPassed / createdAtHalfLife);
+  console.log(agedScore);
   const engamentScore = likesScore + shares + commentScore;
+  let friendsOrGlobalConnectionsScore = 0;
+  // if post is from global person of creator user intaract with
+  if (
+    globalConnections.length !== 0 &&
+    globalConnections.includes(post.connectionId)
+  ) {
+    friendsOrGlobalConnectionsScore = 5;
+  } else if (
+    friendsConnections.length !== 0 &&
+    friendsConnections.includes(post.connectionId)
+  ) {
+    // else if post is from user friends connection
+    friendsOrGlobalConnectionsScore = 10;
+  }
+  let totalScore = 0;
+  if (friendsOrGlobalConnectionsScore !== 0) {
+    //added it up with to totalscore if its from user intreast
+    totalScore = agedScore + engamentScore * friendsOrGlobalConnectionsScore;
+  } else {
+    totalScore = agedScore + engamentScore;
+    console.log("else");
+  }
+  if (userConnectionId) {
+    if (post.engamentStates.likesId.includes(userConnectionId)) {
+      totalScore = totalScore / 1.5;
+    }
+  }
+  console.log(`${totalScore}: total`);
   const result = {
     ...post,
-    totalScore: agedScore * engamentScore,
+    totalScore: totalScore,
   };
   return result;
 }

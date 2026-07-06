@@ -7,12 +7,14 @@ const apiRequstValidation = require("../../middlewares/apiValidation.js");
 const userValdation = require("../../middlewares/userValidation.js");
 //decay algorithim and states
 const decayStats = require("./decayAlgorithim.js");
+const userConnections = require("../../modules/userConnections.js.js");
 //get post by user intreast
 async function getPostByUserIntrest(userFeedsData, res) {
   try {
     const feedsList = [];
     const postIds = [];
     const userFeedsDataAnalisis = userFeedsData;
+    const userConnectionId = userFeedsData.connectionId;
     const userMediaIntaraction = userFeedsData.mediaIntaractions;
     const hashTages = userMediaIntaraction.hashTages;
     const connectionsMedia = userMediaIntaraction.connectionsMedia;
@@ -58,7 +60,7 @@ async function getPostByUserIntrest(userFeedsData, res) {
           hashTages: { $in: topHalfHashTagsOfUser },
           createdAt: -1,
         })
-        .limit(20)
+        .limit(50)
         .lean();
       if (feeds.length !== 0) {
         for (const feed of feeds) {
@@ -109,7 +111,7 @@ async function getPostByUserIntrest(userFeedsData, res) {
       for (const connection of topHalfConnectionsIds) {
         const feeds = await feedsPosts
           .find({ connectionId: connection, createdAt: -1 })
-          .limit(5)
+          .limit(10)
           .lean();
         if (feeds.length !== 0) {
           for (const feed of feeds) {
@@ -166,7 +168,7 @@ async function getPostByUserIntrest(userFeedsData, res) {
       for (const connection of topHalfGlobalConnectionsIds) {
         const feeds = await feedsPosts
           .find({ connectionId: connection, createdAt: -1 })
-          .limit(5)
+          .limit(10)
           .lean();
         if (feeds.length !== 0) {
           for (const feed of feeds) {
@@ -181,6 +183,9 @@ async function getPostByUserIntrest(userFeedsData, res) {
     const userIntreastList = {
       feedsList: [...feedsList],
       postIds: [...postIds],
+      userConnectionId: userConnectionId,
+      globalConnections: [...topHalfGlobalConnectionsIds],
+      friendsConnections: [...topHalfConnectionsIds],
       pass: true,
     };
     return userIntreastList;
@@ -204,6 +209,9 @@ mediaFeeds.get("/content", async (req, res) => {
     });
     let feedsList = [];
     let postIds = [];
+    let globalConnections = [];
+    let friendsConnections = [];
+    let userConnectionId;
     //get feeds by user intresst
     if (
       userFeedsData.length !== 0 &&
@@ -216,15 +224,18 @@ mediaFeeds.get("/content", async (req, res) => {
       if (!data.pass) return;
       feedsList = [...feedsList, data.feedsList];
       postIds = [...feedsList, data.postIds];
+      globalConnections = [...globalConnections, data.globalConnections];
+      friendsConnections = [...friendsConnections, data.friendsConnections];
+      userConnectionId = data.userConnectionId;
     }
     //get global feeds
-    const globalPostLimits = feedsList.length > 50 ? 100 : 150;
+    const globalPostLimits = feedsList.length > 50 ? 150 : 200;
     const posts = await feedsPosts
       .find()
       .sort({ createdAt: -1 })
       .limit(globalPostLimits)
       .lean();
-    const feeds = posts;
+    const feeds = [...posts];
     if (feeds.length !== 0) {
       for (const feed of feeds) {
         if (!postIds.includes(feed.postId)) {
@@ -237,7 +248,12 @@ mediaFeeds.get("/content", async (req, res) => {
     const decayScoresPost = [];
     if (feedsList.length !== 0) {
       for (const post of feedsList) {
-        const score = await decayStats(post);
+        const score = await decayStats(
+          post,
+          globalConnections,
+          friendsConnections,
+          userConnectionId,
+        );
         if (score) {
           decayScoresPost.push(score);
         }
@@ -248,10 +264,13 @@ mediaFeeds.get("/content", async (req, res) => {
         });
         if (sortByScore.length !== 0) {
           const filtedList = [];
+          let count = 0;
           for (const post of sortByScore) {
+            if (count >= 200) break;
             const data = { ...post };
             delete data.totalScore;
             filtedList.push(data);
+            count += 1;
           }
           decayedFeedsList = [...filtedList];
         }
