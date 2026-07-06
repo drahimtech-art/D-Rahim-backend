@@ -8,6 +8,7 @@ const userValdation = require("../../middlewares/userValidation.js");
 //decay algorithim and states
 const decayStats = require("./decayAlgorithim.js");
 const userConnections = require("../../modules/userConnections.js.js");
+const validateUser = require("../../middlewares/userValidation.js");
 //get post by user intreast
 async function getPostByUserIntrest(userFeedsData, res) {
   try {
@@ -199,111 +200,123 @@ async function getPostByUserIntrest(userFeedsData, res) {
   }
 }
 
-mediaFeeds.get("/content", async (req, res) => {
-  try {
-    const userId = "6a4a53e7e32a0f8e61531be8";
-    const connectionId = "1fa6df25-5545-429b-94a5-dd6f3052d07c";
-    const userFeedsData = await userLeaingData.find({
-      userId: userId,
-      connectionId: connectionId,
-    });
-    let feedsList = [];
-    let postIds = [];
-    let globalConnections = [];
-    let friendsConnections = [];
-    let userConnectionId;
-    //get feeds by user intresst
-    if (
-      userFeedsData.length !== 0 &&
-      (userFeedsData[0].mediaIntaractions.connectionsMedia.length !== 0 ||
-        userFeedsData[0].mediaIntaractions.globalConnectionsMedia.length !==
-          0 ||
-        userFeedsData[0].mediaIntaractions.hashTages.length !== 0)
-    ) {
-      const data = await getPostByUserIntrest(userFeedsData, res);
-      if (!data.pass) return;
-      feedsList = [...feedsList, data.feedsList];
-      postIds = [...feedsList, data.postIds];
-      globalConnections = [...globalConnections, data.globalConnections];
-      friendsConnections = [...friendsConnections, data.friendsConnections];
-      userConnectionId = data.userConnectionId;
-    }
-    //get global feeds
-    const globalPostLimits = feedsList.length > 100 ? 300 : 500;
-    const TWO_WEEKS_AGO = new Date(new Date() - 14 * 24 * 60 * 60 * 1000);
-    const THREE_DAYS_AGO = new Date(new Date() - 3 * 24 * 60 * 60 * 1000);
-    const posts = await feedsPosts
-      .find({
-        $or: [
-          {
-            createdAt: { $gte: TWO_WEEKS_AGO },
-          },
-          {
-            createdAt: { $gte: THREE_DAYS_AGO },
-            "engament.likes": { $gte: 50 },
-            "engament.shares": { $gte: 10 },
-          },
-        ],
-      })
-      .sort({ createdAt: -1 })
-      .limit(globalPostLimits)
-      .lean();
-    const feeds = [...posts];
-    if (feeds.length !== 0) {
-      for (const feed of feeds) {
-        if (!postIds.includes(feed.postId)) {
-          feedsList.push(feed);
-          postIds.push(feed.postId);
-        }
+mediaFeeds.get(
+  "/content/:id",
+  apiRequstValidation,
+  validateUser,
+  async (req, res) => {
+    try {
+      const connectionId = req.params.id;
+      if (!connectionId)
+        return res
+          .status(400)
+          .json({
+            ok: false,
+            message: `invalide requst params connection id is required`,
+          });
+      const userId = "6a4a53e7e32a0f8e61531be8";
+      const userFeedsData = await userLeaingData.find({
+        userId: userId,
+        connectionId: connectionId,
+      });
+      let feedsList = [];
+      let postIds = [];
+      let globalConnections = [];
+      let friendsConnections = [];
+      let userConnectionId;
+      //get feeds by user intresst
+      if (
+        userFeedsData.length !== 0 &&
+        (userFeedsData[0].mediaIntaractions.connectionsMedia.length !== 0 ||
+          userFeedsData[0].mediaIntaractions.globalConnectionsMedia.length !==
+            0 ||
+          userFeedsData[0].mediaIntaractions.hashTages.length !== 0)
+      ) {
+        const data = await getPostByUserIntrest(userFeedsData, res);
+        if (!data.pass) return;
+        feedsList = [...feedsList, data.feedsList];
+        postIds = [...feedsList, data.postIds];
+        globalConnections = [...globalConnections, data.globalConnections];
+        friendsConnections = [...friendsConnections, data.friendsConnections];
+        userConnectionId = data.userConnectionId;
       }
-    }
-    let decayedFeedsList = [];
-    const decayScoresPost = [];
-    if (feedsList.length !== 0) {
-      for (const post of feedsList) {
-        const score = await decayStats(
-          post,
-          globalConnections,
-          friendsConnections,
-          userConnectionId,
-        );
-        if (score) {
-          decayScoresPost.push(score);
-        }
-      }
-      if (decayScoresPost.length !== 0) {
-        const sortByScore = decayScoresPost.sort((a, b) => {
-          return b.totalScore - a.totalScore;
-        });
-        if (sortByScore.length !== 0) {
-          const filtedList = [];
-          let count = 0;
-          for (const post of sortByScore) {
-            if (count >= 200) break;
-            const data = { ...post };
-            delete data.totalScore;
-            filtedList.push(data);
-            count += 1;
+      //get global feeds
+      const globalPostLimits = feedsList.length > 100 ? 300 : 500;
+      const TWO_WEEKS_AGO = new Date(new Date() - 14 * 24 * 60 * 60 * 1000);
+      const THREE_DAYS_AGO = new Date(new Date() - 3 * 24 * 60 * 60 * 1000);
+      const posts = await feedsPosts
+        .find({
+          $or: [
+            {
+              createdAt: { $gte: TWO_WEEKS_AGO },
+            },
+            {
+              createdAt: { $gte: THREE_DAYS_AGO },
+              "engament.likes": { $gte: 50 },
+              "engament.shares": { $gte: 10 },
+            },
+          ],
+        })
+        .sort({ createdAt: -1 })
+        .limit(globalPostLimits)
+        .lean();
+      const feeds = [...posts];
+      if (feeds.length !== 0) {
+        for (const feed of feeds) {
+          if (!postIds.includes(feed.postId)) {
+            feedsList.push(feed);
+            postIds.push(feed.postId);
           }
-          // suffle result
-          function shuffle(list) {
-            const l = [...list];
-            for (let i = l.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [l[i], l[j]] = [l[j], l[i]];
+        }
+      }
+      let decayedFeedsList = [];
+      const decayScoresPost = [];
+      if (feedsList.length !== 0) {
+        for (const post of feedsList) {
+          const score = await decayStats(
+            post,
+            globalConnections,
+            friendsConnections,
+            userConnectionId,
+          );
+          if (score) {
+            decayScoresPost.push(score);
+          }
+        }
+        if (decayScoresPost.length !== 0) {
+          const sortByScore = decayScoresPost.sort((a, b) => {
+            return b.totalScore - a.totalScore;
+          });
+          if (sortByScore.length !== 0) {
+            const filtedList = [];
+            let count = 0;
+            for (const post of sortByScore) {
+              if (count >= 200) break;
+              const data = { ...post };
+              delete data.totalScore;
+              filtedList.push(data);
+              count += 1;
             }
-            return l;
+            // suffle result
+            function shuffle(list) {
+              const l = [...list];
+              for (let i = l.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [l[i], l[j]] = [l[j], l[i]];
+              }
+              return l;
+            }
+            const shuffledFeeds = shuffle(filtedList);
+            decayedFeedsList = [...shuffledFeeds];
           }
-          const shuffledFeeds = shuffle(filtedList);
-          decayedFeedsList = [...shuffledFeeds];
         }
       }
+      res
+        .status(200)
+        .json({ ok: true, message: "succesfull", feeds: decayedFeedsList });
+    } catch (error) {
+      res.status(500).json({ ok: false, message: `server error ${error}` });
     }
-    res
-      .status(200)
-      .json({ ok: true, message: "succesfull", feeds: decayedFeedsList });
-  } catch (error) {
-    res.status(500).json({ ok: false, message: `server error ${error}` });
-  }
-});
+  },
+);
 module.exports = mediaFeeds;
