@@ -51,7 +51,7 @@ POST  http://localhost:5000/feeds/upload/content
 Content-Type: application/json
 
 {
-    "connectionId" :  "1fa6df25-5545-429b-94a5-dd6f3052d07c",
-    "hashTages" : ["#html", "#java", "#webdev"], 
-    "caption" :"blah blah"
+    "connectionId" :  "8531f3d4-ff8c-49dd-a157-115c9f83cc11",
+    "hashTages" : ["#html", "#java", "#webdev", "#jokes", "#javaScript"], 
+    "caption" :"yo this a message from james yo!"
 }
