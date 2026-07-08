@@ -62,7 +62,7 @@ async function getPostByUserIntrest(userFeedsData, res) {
           hashTages: { $in: topHalfHashTagsOfUser },
           createdAt: -1,
         })
-        .limit(50)
+        .limit(20)
         .lean();
       if (feeds.length !== 0) {
         for (const feed of feeds) {
@@ -110,17 +110,15 @@ async function getPostByUserIntrest(userFeedsData, res) {
     }
     //
     if (topHalfConnectionsIds.length != 0) {
-      for (const connection of topHalfConnectionsIds) {
-        const feeds = await feedsPosts
-          .find({ connectionId: connection, createdAt: -1 })
-          .limit(10)
-          .lean();
-        if (feeds.length !== 0) {
-          for (const feed of feeds) {
-            if (!postIds.includes(feed.postId)) {
-              feedsList.push(feed);
-              postIds.push(feed.postId);
-            }
+      const feeds = await feedsPosts
+        .find({ connectionId: { $in: topHalfConnectionsIds }, createdAt: -1 })
+        .limit(20)
+        .lean();
+      if (feeds.length !== 0) {
+        for (const feed of feeds) {
+          if (!postIds.includes(feed.postId)) {
+            feedsList.push(feed);
+            postIds.push(feed.postId);
           }
         }
       }
@@ -167,17 +165,15 @@ async function getPostByUserIntrest(userFeedsData, res) {
     }
     //
     if (topHalfGlobalConnectionsIds.length != 0) {
-      for (const connection of topHalfGlobalConnectionsIds) {
-        const feeds = await feedsPosts
-          .find({ connectionId: connection, createdAt: -1 })
-          .limit(10)
-          .lean();
-        if (feeds.length !== 0) {
-          for (const feed of feeds) {
-            if (!postIds.includes(feed.postId)) {
-              feedsList.push(feed);
-              postIds.push(feed.postId);
-            }
+      const feeds = await feedsPosts
+        .find({ connectionId: { $in: topHalfConnectionsIds }, createdAt: -1 })
+        .limit(20)
+        .lean();
+      if (feeds.length !== 0) {
+        for (const feed of feeds) {
+          if (!postIds.includes(feed.postId)) {
+            feedsList.push(feed);
+            postIds.push(feed.postId);
           }
         }
       }
@@ -240,7 +236,7 @@ mediaFeeds.get(
         userConnectionId = data.userConnectionId;
       }
       //get global feeds
-      const globalPostLimits = feedsList.length > 100 ? 300 : 500;
+      const globalPostLimits = feedsList.length > 50 ? 150 : 200;
       const TWO_WEEKS_AGO = new Date(new Date() - 14 * 24 * 60 * 60 * 1000);
       const THREE_DAYS_AGO = new Date(new Date() - 3 * 24 * 60 * 60 * 1000);
       const posts = await feedsPosts
