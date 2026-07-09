@@ -101,9 +101,10 @@ connectionsRouter.post(
       const addConnection = new userConnections(connectionInfo);
       const responds = await addConnection.save();
       //devmode change to connection requst later
+      const findUser = await userData.findById(userId);
       const connectionInfoForFriend = {
         userId: findContact[0]._id,
-        contactId: findContact[0].connectionId,
+        contactId: findUser.connectionId,
         chatGroupId: chatGroupId,
       };
       const addConnectionForFriend = new userConnections(
