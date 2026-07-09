@@ -5,21 +5,13 @@ const connnectionSchema = new Schema({
     type: String,
     required: true,
   },
-  contactFirstName: {
-    type: String,
-    required: true,
-  },
-  contactLastName: {
-    type: String,
-    required: true,
-  },
   contactId: {
     type: String,
     required: true,
   },
-  contactImage: {
+  chatGroupId: {
     type: String,
-    required: false,
+    required: true,
   },
   createdAt: { type: Date, default: Date.now },
 });

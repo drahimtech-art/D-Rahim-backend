@@ -22,6 +22,7 @@ const groupChatSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 groupChatSchema.index({ groupId: 1, "messages.createdAt": 1 });
+groupChatSchema.index({ groupId: 1 });
 const connnectionMessageSchema = mongoose.model(
   "connectionMassages",
   messageSchema,

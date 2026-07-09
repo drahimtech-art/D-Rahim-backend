@@ -6,6 +6,7 @@ const userData = require("../modules/studentUser.js");
 const multer = require("multer");
 const path = require("path");
 const { sendFileEvents } = require("./socket.js");
+const { randomUUID } = require("crypto");
 //middlewares
 const apiRequstValidation = require("../middlewares/apiValidation.js");
 const userValdation = require("../middlewares/userValidation.js");
@@ -96,7 +97,7 @@ async function validateReqBody(req, res, next) {
     res.status(500).json({ ok: false, message: `server error: ${error}` });
   }
 }
-//
+//get chat history of group
 connectionsRouter.post(
   "/contact/messages",
   apiRequstValidation,
@@ -105,14 +106,10 @@ connectionsRouter.post(
   async (req, res) => {
     try {
       const body = res.body;
-      const connectionId = body.connectionId;
-      const contactId = body.contactId;
+      const groupId = body.groupId;
       const findChatHistory = await contactMessage
-        .find({
-          connectionId: connectionId,
-          contactId: contactId,
-        })
-        .sort({ createdAt: -1 })
+        .find({ groupId: groupId })
+        .sort({ "messages.createdAt": -1 })
         .limit(50);
       if (findChatHistory.length === 0)
         return res
