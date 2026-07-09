@@ -24,9 +24,46 @@ connectionsRouter.get(
         return res
           .status(404)
           .json({ ok: false, message: "no connections found" });
+      //
+      const connectionsId = [];
+      for (let i = 0; i < requst.length; i++) {
+        connectionsId.push(requst[i].contactId);
+      }
+      //
+      const allConnectionsInfo = await userData.find(
+        { connectionId: { $in: connectionsId } },
+        { firstName: 1, lastName: 1, connectionId: 1, imageUrl: 1 },
+      );
+      //
+      const connectionsList = [];
+      for (let i = 0; i < allConnectionsInfo.length; i++) {
+        const halfInfo = {
+          contactFirstName: allConnectionsInfo[i].firstName,
+          contactLastName: allConnectionsInfo[i].lastName,
+          contactId: allConnectionsInfo[i].connectionId,
+          contactImage: allConnectionsInfo[i].imageUrl,
+        };
+        for (let j = 0; j < requst.length; j++) {
+          if (halfInfo.contactId === requst[j].contactId) {
+            const fullInfo = {
+              ...halfInfo,
+              chatGroupId: requst[j].chatGroupId,
+            };
+            connectionsList.push(fullInfo);
+            break;
+          }
+        }
+      }
+      //
+      if (connectionsList.length === 0)
+        return res.status(500).json({
+          ok: false,
+          message:
+            "somthing went wrong while trying to filter & conbine connections list ",
+        });
       res
         .status(200)
-        .json({ ok: true, message: "succesful", connections: requst });
+        .json({ ok: true, message: "succesful", connections: connectionsList });
     } catch (error) {
       console.log(`server error : ${error}`);
       res.status(500).json({ ok: false, message: `server error : ${error}` });
@@ -73,7 +110,14 @@ connectionsRouter.post(
         connectionInfoForFriend,
       );
       const respondsForFriend = await addConnectionForFriend.save();
-      if (!responds || respondsForFriend)
+      //devmode
+      const createMessageGroupForConnections = new contactMessage({
+        groupId: chatGroupId,
+        messages: [],
+        createdAt: new Date(),
+      });
+      const saveMessageGroup = await createMessageGroupForConnections.save();
+      if (!responds || !respondsForFriend || !createMessageGroupForConnections)
         return res.status(403).json({
           ok: false,
           message: `something went wrong can't add connection at this time`,
@@ -90,13 +134,7 @@ connectionsRouter.post(
 async function validateReqBody(req, res, next) {
   try {
     const body = req.body;
-    if (!body)
-      return res
-        .status(400)
-        .json({ ok: false, message: "invalide requst body" });
-    const connectionId = body.connectionId;
-    const contactId = body.contactId;
-    if (!connectionId || !contactId)
+    if (!body || !body.groupId)
       return res
         .status(400)
         .json({ ok: false, message: "invalide requst body" });
@@ -119,28 +157,28 @@ connectionsRouter.post(
       const findChatHistory = await contactMessage
         .find({ groupId: groupId })
         .sort({ "messages.createdAt": -1 })
-        .limit(50);
+        .limit(50)
+        .lean();
       if (findChatHistory.length === 0)
         return res
           .status(404)
           .json({ ok: false, message: "No chat history found" });
-      const respondsList = await findChatHistory.map((e) => {
+      const respondsList = findChatHistory[0].messages.map((e) => {
         const dataFomart = {
-          from: e.messages.from,
-          to: e.messages.to,
-          type: e.messages.type,
-          imgUrl: e.messages.imgUrl,
-          date: e.messages.date,
-          time: e.messages.time,
-          text: e.messages.text,
+          from: e.from,
+          to: e.to,
+          type: e.type,
+          imgUrl: e.imgUrl,
+          date: e.date,
+          time: e.time,
+          text: e.text,
         };
         return dataFomart;
       });
-      const reversedArray = respondsList.reverse();
       res.status(200).json({
         ok: true,
         message: "chat records retrived succesfull",
-        chatHistory: reversedArray,
+        chatHistory: respondsList,
       });
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error: ${error}` });

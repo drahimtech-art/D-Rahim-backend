@@ -18,13 +18,17 @@ const groupChatSchema = new Schema({
     type: String,
     required: true,
   },
-  messages: [messageSchema],
+  messages: {
+    type: [messageSchema],
+    required: true,
+    default: [],
+  },
   createdAt: { type: Date, default: Date.now },
 });
 groupChatSchema.index({ groupId: 1, "messages.createdAt": 1 });
 groupChatSchema.index({ groupId: 1 });
 const connnectionMessageSchema = mongoose.model(
   "connectionMassages",
-  messageSchema,
+  groupChatSchema,
 );
 module.exports = connnectionMessageSchema;

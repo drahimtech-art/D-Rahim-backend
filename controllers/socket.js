@@ -25,9 +25,10 @@ function validateClient(socket) {
 
 async function saveChatToDB(chatId, messages) {
   try {
-    const addChatToList = await contactMessages.updateOne(
-      { chatGroupId: chatId },
+    const addChatToList = await contactMessages.findOneAndUpdate(
+      { groupId: chatId },
       { $push: { messages: { ...messages, createdAt: new Date() } } },
+      { runValidators: true },
     );
     if (addChatToList) {
       console.log("Chat history created succesfull");

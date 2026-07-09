@@ -25,12 +25,12 @@ Content-Type: application/json
 }
 
 ###
-POST  http://localhost:5000/connection/user/add/1ed0d6e0-267d-4e53-a000-77a637de42d5
+POST  http://localhost:5000/connection/user/add/8531f3d4-ff8c-49dd-a157-115c9f83cc11
 X-Frontend-Key: 86d18ffe-09a5-43ef-8008-608dc117c4f476dae630-f1c6-4379-b8da-f1106f6c1f50
 Content-Type: application/json
 
 {
-    "userId" : "6a39d2617f20f881079fe878"
+    "userId" : "6a39d2a17f20f881079fe879"
 }
 
 ###
