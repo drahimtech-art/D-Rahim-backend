@@ -22,35 +22,14 @@ function validateClient(socket) {
   if (clientId !== process.env.CLIENT_KEY) return socket.disconnect();
 }
 // save chat to db func
-async function saveForUserChatToDB(connectionId, contactId, message) {
+
+async function saveChatToDB(chatId, messages) {
   try {
-    const createChatData = new contactMessages({
-      connectionId: connectionId,
-      contactId: contactId,
-      messages: message,
-      createdAt: new Date(),
-    });
-    const saveData = await createChatData.save();
-    if (saveData) {
-      console.log("Chat history created succesfull");
-    } else {
-      console.log("Chat history creation failed");
-    }
-  } catch (error) {
-    console.log(`server error: ${error}`);
-  }
-}
-//
-async function saveForConatactChatToDB(connectionId, contactId, message) {
-  try {
-    const createChatData = new contactMessages({
-      connectionId: contactId,
-      contactId: connectionId,
-      messages: message,
-      createdAt: new Date(),
-    });
-    const saveData = await createChatData.save();
-    if (saveData) {
+    const addChatToList = await contactMessages.updateOne(
+      { chatGroupId: chatId },
+      { $push: { messages: { ...messages, createdAt: new Date() } } },
+    );
+    if (addChatToList) {
       console.log("Chat history created succesfull");
     } else {
       console.log("Chat history creation failed");
@@ -65,9 +44,8 @@ async function sendFileEvents(messages, room) {
   try {
     const connectionId = messages.from;
     const contactId = messages.to;
-    saveForUserChatToDB(connectionId, contactId, messages);
-    saveForConatactChatToDB(connectionId, contactId, messages);
-    io.to(room).emit("receive-message", messages);
+    saveChatToDB(room.chatId, messages);
+    io.to(room.connection).emit("receive-message", messages);
   } catch (error) {
     console.log(error);
   }
@@ -90,9 +68,8 @@ io.on("connection", async (socket) => {
     socket.on("send-message", (messages, room) => {
       const connectionId = messages.from;
       const contactId = messages.to;
-      saveForUserChatToDB(connectionId, contactId, messages);
-      saveForConatactChatToDB(connectionId, contactId, messages);
-      socket.to(room).emit("receive-message", messages);
+      saveChatToDB(room.chatId, messages);
+      socket.to(room.connection).emit("receive-message", messages);
     });
   } catch (error) {
     console.log(error);

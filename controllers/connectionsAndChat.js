@@ -55,16 +55,25 @@ connectionsRouter.post(
         return res
           .status(404)
           .json({ ok: false, message: "no user with the given id found" });
+      const chatGroupId = `${randomUUID()}$${contactId}`;
       const connectionInfo = {
         userId: userId,
-        contactFirstName: findContact[0].firstName,
-        contactLastName: findContact[0].lastName,
         contactId: contactId,
-        contactImage: findContact[0].imageUrl ? findContact[0].imageUrl : null,
+        chatGroupId: chatGroupId,
       };
       const addConnection = new userConnections(connectionInfo);
       const responds = await addConnection.save();
-      if (!responds)
+      //devmode change to connection requst later
+      const connectionInfoForFriend = {
+        userId: findContact[0]._id,
+        contactId: findContact[0].connectionId,
+        chatGroupId: chatGroupId,
+      };
+      const addConnectionForFriend = new userConnections(
+        connectionInfoForFriend,
+      );
+      const respondsForFriend = await addConnectionForFriend.save();
+      if (!responds || respondsForFriend)
         return res.status(403).json({
           ok: false,
           message: `something went wrong can't add connection at this time`,
