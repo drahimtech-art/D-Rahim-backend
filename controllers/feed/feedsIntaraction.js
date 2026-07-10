@@ -226,13 +226,13 @@ feedsIntaraction.put(
           //
           for (let i = 0; i < hashTagsInPost.length; i++) {
             // added hastages in post
-            const postHashTag = hashTagsInPost[i];
+            const postHashTag = hashTagsInPost[i].trim();
             const hashTagsData = {
               tag: postHashTag,
             };
             for (let j = 0; j < userHashTags.length; j++) {
               if (
-                userHashTags[j].tag === postHashTag &&
+                userHashTags[j].tag.trim() === postHashTag &&
                 !addedUserHashTagesWithPostHashTags.includes(postHashTag)
               ) {
                 const rate = userHashTags[j].rate + 0.2;
@@ -257,15 +257,19 @@ feedsIntaraction.put(
           }
           ///
           for (let i = 0; i < userHashTags.length; i++) {
-            if (addedUserHashTagesWithPostHashTags.includes(userHashTags[i]))
-              continue;
-            const hashTagsData = {
-              tag: userHashTags[i].tag,
-              rate: userHashTags[i].rate - 0.05,
-            };
-            if (hashTagsData.rate > 0) {
-              userHashTagesWithPostHashTags.push(hashTagsData);
-              addedUserHashTagesWithPostHashTags.push(hashTagsData.tag);
+            if (
+              !addedUserHashTagesWithPostHashTags.includes(
+                userHashTags[i].tag.trim(),
+              )
+            ) {
+              const hashTagsData = {
+                tag: userHashTags[i].tag.trim(),
+                rate: userHashTags[i].rate - 0.05,
+              };
+              if (hashTagsData.rate > 0) {
+                userHashTagesWithPostHashTags.push(hashTagsData);
+                addedUserHashTagesWithPostHashTags.push(hashTagsData.tag);
+              }
             }
           }
         } else {
