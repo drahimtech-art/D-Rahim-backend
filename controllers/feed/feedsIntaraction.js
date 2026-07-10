@@ -158,6 +158,20 @@ feedsIntaraction.put(
           };
           updatedUserMediaIntaractionConnections.push(newConnectionData);
         }
+        //for global coonections
+        const userMediaIntaractionGlobalConnections =
+          userMediaIntrest[0].mediaIntaractions.globalConnectionsMedia;
+        for (const connections of userMediaIntaractionGlobalConnections) {
+          const newGlobalConnectionData = {
+            connectionId: connections.connectionId,
+            rate: connections.rate - 0.2,
+          };
+          if (newGlobalConnectionData.rate > 0) {
+            updateduserMediaIntaractionGlobalConnections.push(
+              newGlobalConnectionData,
+            );
+          }
+        }
       } else {
         const userMediaIntaractionGlobalConnections =
           userMediaIntrest[0].mediaIntaractions.globalConnectionsMedia;
@@ -214,6 +228,18 @@ feedsIntaraction.put(
           updateduserMediaIntaractionGlobalConnections.push(
             newGlobalConnectionData,
           );
+        }
+        //for friends coonections
+        const userMediaIntaractionConnections =
+          userMediaIntrest[0].mediaIntaractions.connectionsMedia;
+        for (const connections of userMediaIntaractionConnections) {
+          const newConnectionData = {
+            connectionId: connections.connectionId,
+            rate: connections.rate - 0.2,
+          };
+          if (newConnectionData.rate > 0) {
+            updatedUserMediaIntaractionConnections.push(newConnectionData);
+          }
         }
       }
       //score for hastags
