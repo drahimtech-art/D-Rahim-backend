@@ -130,13 +130,13 @@ registrationRouter.post(
         connectionId: addUser.connectionId,
         userId: addUser._id,
         mediaIntaractions: {
-          hashTages: [],
+          hashTags: [],
           connectionsMedia: [],
           globalConnectionsMedia: [],
+          createdAt: new Date(),
         },
       });
       const saveUserLeaingData = await creatUserFeedsLearingData.save();
-
       res.status(201).json({ ok: true, message: "succesfull" });
     } catch (error) {
       res.status(200).json({ ok: false, message: `server error: ${error} ` });
