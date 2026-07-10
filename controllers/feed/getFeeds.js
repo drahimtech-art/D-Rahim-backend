@@ -5,11 +5,10 @@ const feedsPosts = require("../../modules/feeds/post.js");
 const userData = require("../../modules/studentUser.js");
 //middlewares
 const apiRequstValidation = require("../../middlewares/apiValidation.js");
-const userValdation = require("../../middlewares/userValidation.js");
+const validateUser = require("../../middlewares/userValidation.js");
 //decay algorithim and states
 const decayStats = require("./decayAlgorithim.js");
-const userConnections = require("../../modules/userConnections.js.js");
-const validateUser = require("../../middlewares/userValidation.js");
+const userConnections = require("../../modules/userConnections.js");
 //get post by user intreast
 async function getPostByUserIntrest(userFeedsData, res) {
   try {

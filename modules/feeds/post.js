@@ -92,5 +92,6 @@ const postSchema = new Schema({
 postSchema.index({ connectionId: 1, postId: 1, createdAt: -1 });
 postSchema.index({ hashTages: 1, createdAt: -1 });
 postSchema.index({ engament: 1, createdAt: -1 });
+postSchema.index({ postId: 1 });
 const postData = mongoose.model("feedPost", postSchema);
 module.exports = postData;

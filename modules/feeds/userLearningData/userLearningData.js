@@ -10,37 +10,73 @@ const userLearningSchema = new Schema({
     require: true,
   },
   mediaIntaractions: {
-    hashTages: {
-      type: Array,
+    hashTags: {
+      type: [
+        {
+          tag: String,
+          rate: Number,
+        },
+        { _id: false },
+      ],
       require: true,
+      default: [],
     },
     connectionsMedia: {
-      type: Array,
+      type: [
+        {
+          connectionId: String,
+          rate: Number,
+        },
+        { _id: false },
+      ],
       require: true,
+      default: [],
     },
     globalConnectionsMedia: {
-      type: Array,
+      type: [
+        {
+          connectionId: String,
+          rate: Number,
+        },
+        { _id: false },
+      ],
       require: true,
     },
     type: {
-      hashTages: {
-        type: Array,
+      hashTags: {
+        type: [
+          {
+            tag: String,
+            rate: Number,
+          },
+        ],
         require: true,
       },
       connectionsMedia: {
-        type: Array,
+        type: [
+          {
+            connectionId: String,
+            rate: Number,
+          },
+        ],
         require: true,
       },
       globalConnectionsMedia: {
-        type: Array,
+        type: [
+          {
+            connectionId: String,
+            rate: Number,
+          },
+        ],
         require: true,
       },
     },
     require: true,
   },
+  createdAt: { type: Date, require: true, default: Date.now },
 });
-userLearningSchema.index({ userId: 1, connectionId: -1 });
-userLearningSchema.index({ connectionId: -1 });
+userLearningSchema.index({ userId: 1, connectionId: 1 });
+userLearningSchema.index({ connectionId: 1 });
 const userLearningData = mongoose.model(
   "feedsUserLearingData",
   userLearningSchema,
