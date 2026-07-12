@@ -6,6 +6,7 @@ function getPostAge(post) {
 
 function decayStats(p, gc, fc, uc) {
   const post = { ...p };
+  if (!post) return;
   const globalConnections = [...gc];
   const friendsConnections = [...fc];
   const userConnectionId = uc;
@@ -15,7 +16,6 @@ function decayStats(p, gc, fc, uc) {
   const shares = post.engament.shares * 0.7;
   const commentScore = post.engament.comments * 0.5;
   const agedScore = 100 * Math.pow(0.5, daysPassed / createdAtHalfLife);
-  console.log(agedScore);
   const engamentScore = likesScore + shares + commentScore;
   let friendsOrGlobalConnectionsScore = 0;
   // if post is from global person of creator user intaract with

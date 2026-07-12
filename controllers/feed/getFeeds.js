@@ -17,22 +17,23 @@ async function getPostByUserIntrest(userFeedsData, res) {
     const userFeedsDataAnalisis = userFeedsData;
     const userConnectionId = userFeedsData.connectionId;
     const userMediaIntaraction = userFeedsData.mediaIntaractions;
-    const hashTages = userMediaIntaraction.hashTages;
+    console.log(userMediaIntaraction);
+    const hashTags = userMediaIntaraction.hashTags;
     const connectionsMedia = userMediaIntaraction.connectionsMedia;
     const globalConnectionsMedia = userMediaIntaraction.globalConnectionsMedia;
-    // for HashTages
+    // for hashTags
     const topHalfHashTagsOfUser = [];
     const orderTagsRate = [];
     //
-    if (hashTages.length !== 0 && hashTages.length > 1) {
-      const result = hashTages.sort((a, b) => {
+    if (hashTags.length !== 0 && hashTags.length > 1) {
+      const result = hashTags.sort((a, b) => {
         return b.rate - a.rate;
       });
       for (const tags of result) {
         orderTagsRate.push(tags);
       }
-    } else if (hashTages.length !== 0) {
-      for (const tags of hashTages) {
+    } else if (hashTags.length !== 0) {
+      for (const tags of hashTags) {
         orderTagsRate.push(tags);
       }
     }
@@ -45,7 +46,7 @@ async function getPostByUserIntrest(userFeedsData, res) {
       } else {
         totalHalf = Number(half);
       }
-      //push to top halfHashTagesOf User
+      //push to top halfhashTagsOf User
       for (let i = 0; i < totalHalf; i++) {
         topHalfHashTagsOfUser.push(orderTagsRate[i].tag);
       }
@@ -59,8 +60,8 @@ async function getPostByUserIntrest(userFeedsData, res) {
       const feeds = await feedsPosts
         .find({
           hashTages: { $in: topHalfHashTagsOfUser },
-          createdAt: -1,
         })
+        .sort({ createdAt: -1 })
         .limit(20)
         .lean();
       if (feeds.length !== 0) {
@@ -110,7 +111,8 @@ async function getPostByUserIntrest(userFeedsData, res) {
     //
     if (topHalfConnectionsIds.length != 0) {
       const feeds = await feedsPosts
-        .find({ connectionId: { $in: topHalfConnectionsIds }, createdAt: -1 })
+        .find({ connectionId: { $in: topHalfConnectionsIds } })
+        .sort({ createdAt: -1 })
         .limit(20)
         .lean();
       if (feeds.length !== 0) {
@@ -165,7 +167,8 @@ async function getPostByUserIntrest(userFeedsData, res) {
     //
     if (topHalfGlobalConnectionsIds.length != 0) {
       const feeds = await feedsPosts
-        .find({ connectionId: { $in: topHalfConnectionsIds }, createdAt: -1 })
+        .find({ connectionId: { $in: topHalfConnectionsIds } })
+        .sort({ createdAt: -1 })
         .limit(20)
         .lean();
       if (feeds.length !== 0) {
@@ -209,10 +212,12 @@ mediaFeeds.get(
           message: `invalide requst params connection id is required`,
         });
       const userId = "6a4a53e7e32a0f8e61531be8";
-      const userFeedsData = await userLeaingData.find({
-        userId: userId,
-        connectionId: connectionId,
-      });
+      const userFeedsData = await userLeaingData
+        .find({
+          userId: userId,
+          connectionId: connectionId,
+        })
+        .lean();
       let feedsList = [];
       let postIds = [];
       let globalConnections = [];
@@ -224,12 +229,13 @@ mediaFeeds.get(
         (userFeedsData[0].mediaIntaractions.connectionsMedia.length !== 0 ||
           userFeedsData[0].mediaIntaractions.globalConnectionsMedia.length !==
             0 ||
-          userFeedsData[0].mediaIntaractions.hashTages.length !== 0)
+          userFeedsData[0].mediaIntaractions.hashTags.length !== 0)
       ) {
-        const data = await getPostByUserIntrest(userFeedsData, res);
+        const data = await getPostByUserIntrest(userFeedsData[0], res);
         if (!data.pass) return;
-        feedsList = [...feedsList, data.feedsList];
-        postIds = [...feedsList, data.postIds];
+        feedsList = [data.feedsList];
+        console.log(data.feedsList);
+        postIds = [data.postIds];
         globalConnections = [...globalConnections, data.globalConnections];
         friendsConnections = [...friendsConnections, data.friendsConnections];
         userConnectionId = data.userConnectionId;
@@ -258,15 +264,19 @@ mediaFeeds.get(
       if (feeds.length !== 0) {
         for (const feed of feeds) {
           if (!postIds.includes(feed.postId)) {
-            feedsList.push(feed);
-            postIds.push(feed.postId);
+            if (feed._id) {
+              feedsList.push(feed);
+              postIds.push(feed.postId);
+            }
           }
         }
       }
       let decayedFeedsList = [];
       const decayScoresPost = [];
       if (feedsList.length !== 0) {
-        for (const post of feedsList) {
+        for (let i = 0; i < feedsList.length; i++) {
+          const post = feedsList[i];
+          console.log(post);
           const score = await decayStats(
             post,
             globalConnections,
@@ -310,6 +320,7 @@ mediaFeeds.get(
         .json({ ok: true, message: "succesfull", feeds: decayedFeedsList });
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error ${error}` });
+      console.log(error);
     }
   },
 );

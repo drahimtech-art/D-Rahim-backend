@@ -19,7 +19,7 @@ connectionsRouter.get(
   async (req, res) => {
     try {
       const userId = res.tokenId;
-      const requst = await userConnections.find({ userId: userId });
+      const requst = await userConnections.find({ userId: userId }).lean();
       if (requst.length === 0)
         return res
           .status(404)
@@ -30,10 +30,12 @@ connectionsRouter.get(
         connectionsId.push(requst[i].contactId);
       }
       //
-      const allConnectionsInfo = await userData.find(
-        { connectionId: { $in: connectionsId } },
-        { firstName: 1, lastName: 1, connectionId: 1, imageUrl: 1 },
-      );
+      const allConnectionsInfo = await userData
+        .find(
+          { connectionId: { $in: connectionsId } },
+          { firstName: 1, lastName: 1, connectionId: 1, imageUrl: 1, bio: 1 },
+        )
+        .lean();
       //
       const connectionsList = [];
       for (let i = 0; i < allConnectionsInfo.length; i++) {
@@ -42,6 +44,7 @@ connectionsRouter.get(
           contactLastName: allConnectionsInfo[i].lastName,
           contactId: allConnectionsInfo[i].connectionId,
           contactImage: allConnectionsInfo[i].imageUrl,
+          bio: allConnectionsInfo[i].bio,
         };
         for (let j = 0; j < requst.length; j++) {
           if (halfInfo.contactId === requst[j].contactId) {
@@ -78,16 +81,20 @@ connectionsRouter.post(
     const userId = req.body.userId;
     const contactId = req.params.id;
     try {
-      const doesConnectionExist = await userConnections.find({
-        userId: userId,
-        contactId: contactId,
-      });
+      const doesConnectionExist = await userConnections
+        .find({
+          userId: userId,
+          contactId: contactId,
+        })
+        .lean();
       if (doesConnectionExist.length !== 0)
         return res.status(403).json({
           ok: false,
           message: "Contact exist in user connections list",
         });
-      const findContact = await userData.find({ connectionId: contactId });
+      const findContact = await userData
+        .find({ connectionId: contactId })
+        .lean();
       if (findContact.length === 0)
         return res
           .status(404)
@@ -101,7 +108,7 @@ connectionsRouter.post(
       const addConnection = new userConnections(connectionInfo);
       const responds = await addConnection.save();
       //devmode change to connection requst later
-      const findUser = await userData.findById(userId);
+      const findUser = await userData.findById(userId).lean();
       const connectionInfoForFriend = {
         userId: findContact[0]._id,
         contactId: findUser.connectionId,
