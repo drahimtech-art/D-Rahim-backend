@@ -51,6 +51,8 @@ connectionsRouter.get(
           if (halfInfo.contactId === requst[j].contactId) {
             const fullInfo = {
               ...halfInfo,
+              invite: requst[j].invite,
+              isConnected: requst[j].isConnected,
               chatGroupId: requst[j].chatGroupId,
             };
             connectionsList.push(fullInfo);
@@ -84,6 +86,11 @@ connectionsRouter.post(
     const contactId = req.params.id;
     const connectionId = req.body.connectionId;
     try {
+      if (!contactId || !connectionId)
+        return res.status(400).json({
+          ok: false,
+          message: "invalide requst body one or more fields is missing",
+        });
       const doesConnectionExist = await userConnections
         .find({
           userId: userId,
@@ -332,6 +339,87 @@ connectionsRouter.post(
       //sendFileEvents()
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error : ${error}` });
+    }
+  },
+);
+//get connections requst
+connectionsRouter.get(
+  "/requst/:id",
+  apiRequstValidation,
+  userValdation,
+  async (req, res) => {
+    try {
+      const userId = res.tokenId;
+      const connectionId = req.params.id;
+      console.log(userId);
+      console.log(connectionId);
+      if (!userId || !connectionId)
+        return res.status(400).json({
+          ok: false,
+          message: "invalide requst body one or more fields is missing",
+        });
+      const getAllConnectionsRequstListNotYetValidated = await connectionsRequst
+        .find({
+          userId: userId,
+          connectionId: connectionId,
+        })
+        .lean();
+      console.log(getAllConnectionsRequstListNotYetValidated);
+      const connectionsRequstlist = [];
+      if (
+        getAllConnectionsRequstListNotYetValidated.length !== 0 &&
+        getAllConnectionsRequstListNotYetValidated[0].requstList.length !== 0
+      ) {
+        const filteredListOfNotValidatedRequst = [];
+        const filteredListOfNotValidatedRequstId = [];
+        for (const requst of getAllConnectionsRequstListNotYetValidated[0]
+          .requstList) {
+          if (!requst.isConnected) {
+            filteredListOfNotValidatedRequst.push(requst);
+            filteredListOfNotValidatedRequstId.push(requst.contactId);
+          }
+        }
+        const getRequstConnectionsSendersInfor = await userData
+          .find(
+            { connectionId: { $in: filteredListOfNotValidatedRequstId } },
+            {
+              firstName: 1,
+              lastName: 1,
+              connectionId: 1,
+              imageUrl: 1,
+              bio: 1,
+              _id: 0,
+            },
+          )
+          .lean();
+        if (getRequstConnectionsSendersInfor.length !== 0) {
+          for (let i = 0; i < getRequstConnectionsSendersInfor.length; i++) {
+            const contactDataFromRequst = filteredListOfNotValidatedRequst[i];
+            const userData = getRequstConnectionsSendersInfor[i];
+            if (contactDataFromRequst.contactId === userData.connectionId) {
+              const requstFormatedData = {
+                firstName: userData.firstName,
+                lastName: userData.lastName,
+                imageUrl: userData.imageUrl,
+                bio: userData.bio,
+                contactId: contactDataFromRequst.contactId,
+                invite: contactDataFromRequst.invite,
+                isConnected: contactDataFromRequst.isConnected,
+              };
+              connectionsRequstlist.push(requstFormatedData);
+            }
+          }
+        }
+        console.log(connectionsRequstlist);
+        res.status(200).json({
+          ok: true,
+          message: "succesful fecth connection requst",
+          requsts: connectionsRequstlist,
+        });
+      }
+    } catch (error) {
+      res.status(500).json({ ok: false, message: `server error: ${error}` });
+      console.log(`server error: ${error}`);
     }
   },
 );
