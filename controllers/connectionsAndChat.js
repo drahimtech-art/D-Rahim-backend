@@ -351,8 +351,6 @@ connectionsRouter.get(
     try {
       const userId = res.tokenId;
       const connectionId = req.params.id;
-      console.log(userId);
-      console.log(connectionId);
       if (!userId || !connectionId)
         return res.status(400).json({
           ok: false,
@@ -364,7 +362,6 @@ connectionsRouter.get(
           connectionId: connectionId,
         })
         .lean();
-      console.log(getAllConnectionsRequstListNotYetValidated);
       const connectionsRequstlist = [];
       if (
         getAllConnectionsRequstListNotYetValidated.length !== 0 &&
@@ -410,7 +407,6 @@ connectionsRouter.get(
             }
           }
         }
-        console.log(connectionsRequstlist);
         res.status(200).json({
           ok: true,
           message: "succesful fecth connection requst",
