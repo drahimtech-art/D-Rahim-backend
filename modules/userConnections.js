@@ -13,9 +13,18 @@ const connnectionSchema = new Schema({
     type: String,
     required: true,
   },
+  invite: {
+    type: Boolean,
+    required: true,
+  },
+  isConnected: {
+    type: Boolean,
+    required: true,
+  },
   createdAt: { type: Date, default: Date.now },
 });
 connnectionSchema.index({ userId: 1, contactId: -1 });
+connnectionSchema.index({ chatGroupId: 1, isConnected: 1 });
 connnectionSchema.index({ chatGroupId: 1 });
 const userConnections = mongoose.model("userConnections", connnectionSchema);
 module.exports = userConnections;

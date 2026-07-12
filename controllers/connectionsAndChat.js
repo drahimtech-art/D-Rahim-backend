@@ -3,6 +3,7 @@ const connectionsRouter = express.Router();
 const userConnections = require("../modules/userConnections.js");
 const contactMessage = require("../modules/contactMessage.js");
 const userData = require("../modules/studentUser.js");
+const connectionsRequst = require("../modules/connectionsRequst.js");
 const multer = require("multer");
 const path = require("path");
 const { sendFileEvents } = require("./socket.js");
@@ -77,9 +78,11 @@ connectionsRouter.get(
 connectionsRouter.post(
   "/user/add/:id",
   apiRequstValidation,
+  userValdation,
   async (req, res) => {
-    const userId = req.body.userId;
+    const userId = res.tokenId;
     const contactId = req.params.id;
+    const connectionId = req.body.connectionId;
     try {
       const doesConnectionExist = await userConnections
         .find({
@@ -99,38 +102,107 @@ connectionsRouter.post(
         return res
           .status(404)
           .json({ ok: false, message: "no user with the given id found" });
+      const hasConnectionToAddSentRequst = await connectionsRequst
+        .find({
+          userId: userId,
+          connectionId: connectionId,
+        })
+        .lean();
+      if (hasConnectionToAddSentRequst.length !== 0) {
+        // accepy requst if friend to add sent user requst
+        const requstList = hasConnectionToAddSentRequst[0].requstList;
+        let isResutInList;
+        let foundData;
+        const updatedAndApprovedRequstList = [];
+        for (const requst of requstList) {
+          if (requst.contactId === contactId && !requst.isConnected) {
+            isResutInList = true;
+            const connectionRequstInfo = {
+              contactId: requst.contactId,
+              chatGroupId: requst.chatGroupId,
+              invite: true,
+              isConnected: true,
+              createdAt: requst.createdAt,
+            };
+            foundData = connectionRequstInfo;
+            updatedAndApprovedRequstList.push(connectionRequstInfo);
+          } else {
+            updatedAndApprovedRequstList.push(requst);
+          }
+        }
+        if (isResutInList) {
+          const acceptRequst = await connectionsRequst.findOneAndUpdate(
+            { userId: userId, connectionId: connectionId },
+            { requstList: updatedAndApprovedRequstList },
+          );
+          const upDateFriendContactInfor =
+            await userConnections.findOneAndUpdate(
+              { userId: findContact[0]._id, contactId: connectionId },
+              { isConnected: true },
+            );
+          const addConnection = new userConnections({
+            userId: userId,
+            contactId: foundData.contactId,
+            chatGroupId: foundData.chatGroupId,
+            invite: foundData.invite,
+            isConnected: foundData.isConnected,
+            createdAt: new Date(),
+          });
+          const saveConatact = await addConnection.save();
+          if (!acceptRequst || !upDateFriendContactInfor || !saveConatact)
+            return res.status(500).json({
+              ok: false,
+              message:
+                "server error somthing went wrong when trying to validate user connection requst",
+            });
+          return res
+            .status(200)
+            .json({ ok: true, message: "connections succesful added" });
+        }
+      }
       const chatGroupId = `${randomUUID()}$${contactId}`;
-      const connectionInfo = {
-        userId: userId,
+      const connectionInfoToBeSent = {
+        contactId: connectionId,
+        chatGroupId: chatGroupId,
+        invite: true,
+        isConnected: false,
+        createdAt: new Date(),
+      };
+      const sendRequst = await connectionsRequst.findOneAndUpdate(
+        {
+          userId: findContact[0]._id,
+          connectionId: findContact[0].connectionId,
+        },
+        { $push: { requstList: connectionInfoToBeSent } },
+      );
+      if (!sendRequst)
+        return res
+          .status(500)
+          .json({ ok: false, message: "failed to send connection requst" });
+      const connectionInfoToAdded = {
         contactId: contactId,
         chatGroupId: chatGroupId,
+        invite: true,
+        isConnected: false,
+        createdAt: connectionInfoToBeSent.createdAt,
       };
-      const addConnection = new userConnections(connectionInfo);
+      const addConnection = new userConnections({
+        userId: userId,
+        ...connectionInfoToAdded,
+      });
       const responds = await addConnection.save();
-      //devmode change to connection requst later
-      const findUser = await userData.findById(userId).lean();
-      const connectionInfoForFriend = {
-        userId: findContact[0]._id,
-        contactId: findUser.connectionId,
-        chatGroupId: chatGroupId,
-      };
-      const addConnectionForFriend = new userConnections(
-        connectionInfoForFriend,
-      );
-      const respondsForFriend = await addConnectionForFriend.save();
-      //devmode
       const createMessageGroupForConnections = new contactMessage({
         groupId: chatGroupId,
         messages: [],
         createdAt: new Date(),
       });
       const saveMessageGroup = await createMessageGroupForConnections.save();
-      if (!responds || !respondsForFriend || !createMessageGroupForConnections)
+      if (!responds || !createMessageGroupForConnections)
         return res.status(403).json({
           ok: false,
           message: `something went wrong can't add connection at this time`,
         });
-      res.status(201).json({ ok: true, message: "connection requst sent" });
+      res.status(200).json({ ok: true, message: "requst sent succesfuly" });
     } catch (error) {
       console.log(`server error : ${error}`);
       res.status(500).json({ ok: false, message: `server error : ${error}` });
