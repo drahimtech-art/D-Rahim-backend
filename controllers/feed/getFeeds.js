@@ -17,7 +17,6 @@ async function getPostByUserIntrest(userFeedsData, res) {
     const userFeedsDataAnalisis = userFeedsData;
     const userConnectionId = userFeedsData.connectionId;
     const userMediaIntaraction = userFeedsData.mediaIntaractions;
-    console.log(userMediaIntaraction);
     const hashTags = userMediaIntaraction.hashTags;
     const connectionsMedia = userMediaIntaraction.connectionsMedia;
     const globalConnectionsMedia = userMediaIntaraction.globalConnectionsMedia;
@@ -66,7 +65,7 @@ async function getPostByUserIntrest(userFeedsData, res) {
         .lean();
       if (feeds.length !== 0) {
         for (const feed of feeds) {
-          if (!postId.includes(feed.postId)) {
+          if (!postIds.includes(feed.postId)) {
             feedsList.push(feed);
             postIds.push(feed.postId);
           }
@@ -233,11 +232,10 @@ mediaFeeds.get(
       ) {
         const data = await getPostByUserIntrest(userFeedsData[0], res);
         if (!data.pass) return;
-        feedsList = [data.feedsList];
-        console.log(data.feedsList);
-        postIds = [data.postIds];
-        globalConnections = [...globalConnections, data.globalConnections];
-        friendsConnections = [...friendsConnections, data.friendsConnections];
+        feedsList = data.feedsList;
+        postIds = data.postIds;
+        globalConnections = data.globalConnections;
+        friendsConnections = data.friendsConnections;
         userConnectionId = data.userConnectionId;
       }
       //get global feeds
@@ -276,7 +274,6 @@ mediaFeeds.get(
       if (feedsList.length !== 0) {
         for (let i = 0; i < feedsList.length; i++) {
           const post = feedsList[i];
-          console.log(post);
           const score = await decayStats(
             post,
             globalConnections,
