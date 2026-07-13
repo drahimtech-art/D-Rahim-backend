@@ -290,13 +290,56 @@ mediaFeeds.get(
           });
           if (sortByScore.length !== 0) {
             const filtedList = [];
+            const filtedListIds = [];
             let count = 0;
             for (const post of sortByScore) {
               if (count >= 200) break;
               const data = { ...post };
               delete data.totalScore;
               filtedList.push(data);
+              filtedListIds.push(data.connectionId);
               count += 1;
+            }
+            //get author infor
+            const getAuthorInfor = await userData
+              .find(
+                { connectionId: { $in: filtedListIds } },
+                {
+                  firstName: 1,
+                  lastName: 1,
+                  bio: 1,
+                  imageUrl: 1,
+                  connectionId: 1,
+                  _id: 0,
+                },
+              )
+              .lean();
+            if (getAuthorInfor.length === 0)
+              return res.status(404).json({
+                ok: false,
+                message: "somthing whent wrong post autors infor not gound",
+              });
+            // arrange authors infor with authors post in feeds
+            console.log(filtedList.length);
+            console.log(getAuthorInfor);
+            const orderedFeedsPost = [];
+            for (let i = 0; i < filtedList.length; i++) {
+              for (let j = 0; j < getAuthorInfor.length; j++) {
+                // comparing function
+                if (
+                  filtedList[i].connectionId === getAuthorInfor[j].connectionId
+                ) {
+                  const postData = { ...filtedList[i] };
+                  const authorsInfo = { ...getAuthorInfor[j] };
+                  delete postData.connectionId;
+                  delete postData._id;
+                  const olderPostInfo = {
+                    ...authorsInfo,
+                    ...postData,
+                  };
+                  orderedFeedsPost.push(olderPostInfo);
+                }
+              }
             }
             // suffle result
             function shuffle(list) {
@@ -307,7 +350,7 @@ mediaFeeds.get(
               }
               return l;
             }
-            const shuffledFeeds = shuffle(filtedList);
+            const shuffledFeeds = shuffle(orderedFeedsPost);
             decayedFeedsList = [...shuffledFeeds];
           }
         }
@@ -318,40 +361,6 @@ mediaFeeds.get(
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error ${error}` });
       console.log(error);
-    }
-  },
-);
-//get post author info
-mediaFeeds.get(
-  "/author/info/:id",
-  apiRequstValidation,
-  validateUser,
-  async (req, res) => {
-    try {
-      const connectionId = req.params.id;
-      if (!connectionId)
-        return res.status(400).json({
-          ok: false,
-          message: "invalid requst params author connection id is required",
-        });
-      const findAuthor = await userData.find({ connectionId: connectionId });
-      if (findAuthor.length === 0)
-        return res.status(404).json({
-          ok: false,
-          message: "the requsted author not found in records",
-        });
-      const responds = {
-        firstName: findAuthor[0].firstName,
-        lastName: findAuthor[0].lastName,
-        profileImg: findAuthor[0].imageUrl,
-        bio: findAuthor[0].bio,
-      };
-      res
-        .status(200)
-        .json({ ok: true, message: "succesful", author: responds });
-    } catch (error) {
-      res.status(500).json({ ok: false, message: `server error: ${error}` });
-      console.log(`server error: ${error}`);
     }
   },
 );
