@@ -320,8 +320,6 @@ mediaFeeds.get(
                 message: "somthing whent wrong post autors infor not gound",
               });
             // arrange authors infor with authors post in feeds
-            console.log(filtedList.length);
-            console.log(getAuthorInfor);
             const orderedFeedsPost = [];
             for (let i = 0; i < filtedList.length; i++) {
               for (let j = 0; j < getAuthorInfor.length; j++) {
