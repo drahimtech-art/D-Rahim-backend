@@ -65,8 +65,83 @@ const postSchema = new Schema({
         require: true,
       },
       comments: {
-        type: Array,
+        type: [
+          {
+            connectionId: {
+              type: String,
+              require: true,
+            },
+            comment: {
+              type: String,
+              require: true,
+            },
+            likes: {
+              type: Number,
+              require: true,
+            },
+            disLikes: {
+              type: Number,
+              require: true,
+            },
+            date: {
+              type: String,
+              require: true,
+            },
+            time: {
+              type: String,
+              require: true,
+            },
+            createdAt: {
+              type: Date,
+              require: true,
+              default: Date.now,
+            },
+            subComments: {
+              type: [
+                {
+                  connectionId: {
+                    type: String,
+                    require: true,
+                  },
+                  comment: {
+                    type: String,
+                    require: true,
+                  },
+                  likes: {
+                    type: Number,
+                    require: true,
+                  },
+                  disLikes: {
+                    type: Number,
+                    require: true,
+                  },
+                  date: {
+                    type: String,
+                    require: true,
+                  },
+                  time: {
+                    type: String,
+                    require: true,
+                  },
+                  createdAt: {
+                    type: Date,
+                    require: true,
+                    default: Date.now,
+                  },
+                  subComments: {
+                    type: Array,
+                    require: true,
+                    default: [],
+                  },
+                },
+              ],
+              require: true,
+              default: [],
+            },
+          },
+        ],
         require: true,
+        default: [],
       },
     },
     require: true,
