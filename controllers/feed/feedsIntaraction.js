@@ -25,7 +25,11 @@ feedsIntaraction.put(
         return res
           .status(400)
           .json({ ok: false, message: "invalide requst post id is required" });
-      if (!userConnectionId)
+      if (
+        !userConnectionId ||
+        userConnectionId.trim() === "" ||
+        userConnectionId.length < 10
+      )
         return res.status(400).json({
           ok: false,
           message: "invalide requst connection id is required",
@@ -48,11 +52,16 @@ feedsIntaraction.put(
           .json({ ok: false, message: "user feeds media doc not found" });
       //
       const postTotalLikesId = post[0].engamentStates.likesId;
-      const isPostLIkedAlreadyByUser = postTotalLikesId.includes(
-        userConnectionId,
-      )
-        ? true
-        : false;
+      let isPostLIkedAlreadyByUser = false;
+      console.log(post[0].engamentStates.likesId);
+      console.log(userConnectionId);
+      for (let i = 0; i < postTotalLikesId.length; i++) {
+        if (postTotalLikesId[i].trim() === userConnectionId.trim()) {
+          console.log(true);
+          isPostLIkedAlreadyByUser = true;
+          break;
+        }
+      }
       if (isPostLIkedAlreadyByUser)
         return res
           .status(200)
@@ -193,13 +202,14 @@ feedsIntaraction.put(
         ...post[0].engamentStates.comments,
         commentContent,
       ];
+      const postLikesId = post[0].engamentStates.likesId;
       const engaments = {
         likes: postTotalLikes,
         comments: updatedCommentsCount,
         shares: post[0].shares,
       };
       const engamentStates = {
-        likesId: postTotalLikes,
+        likesId: postLikesId,
         comments: updatedCommentsData,
       };
       //update authors post with likes added
@@ -209,9 +219,11 @@ feedsIntaraction.put(
       );
       if (updatePost) {
         //end of authors and response logic
-        res
-          .status(200)
-          .json({ ok: true, message: "Successfully commented on post" });
+        res.status(200).json({
+          ok: true,
+          message: "Successfully commented on post",
+          comment: commentContent,
+        });
       }
       //check if autor if post is a connection to user or just a global creator
       const findPostAuthorInUserConnections = await userConnections
