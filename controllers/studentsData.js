@@ -4,6 +4,7 @@ const userData = require("../modules/studentUser");
 const userConnections = require("../modules/userConnections.js");
 const multer = require("multer");
 const path = require("path");
+const fsPromise = require("fs").promises;
 //middlewares
 const apiRequstValidation = require("../middlewares/apiValidation");
 const userValidation = require("../middlewares/userValidation");
@@ -44,7 +45,7 @@ studentsDataRouter.put(
           .json({ ok: false, message: "invalid requst body" });
       //
       const isImage = req.file;
-      const imageUrl = `http://localhost:5000/studentsProfileImages/${isImage && isImage.filename}`;
+      const imageUrl = `http://${req.headers.host}/studentsProfileImages/${isImage.filename}`;
       const isUserInRecords = await userData.findById(userId);
       if (!isUserInRecords) {
         res.clearCookie("token");
@@ -55,10 +56,11 @@ studentsDataRouter.put(
       const oldPhoneNumber = isUserInRecords.phoneNumber;
       const oldDateOfBirth = isUserInRecords.dateOfBirth;
       const oldBio = isUserInRecords.bio;
+      const oldImageUrl = isUserInRecords.imageUrl;
       const updatedImage = isImage
         ? imageUrl
-        : isUserInRecords.imageUrl
-          ? isUserInRecords.imageUrl
+        : oldImageUrl
+          ? oldImageUrl
           : null;
       if (
         oldFirstName === firstName &&
@@ -114,6 +116,13 @@ studentsDataRouter.put(
         message: "User records updated",
         userInfo: userInfo,
       });
+      if (isImage && oldImageUrl) {
+        const imagePath = oldImageUrl.split(`http://${req.headers.host}/`)[1];
+        await fsPromise
+          .unlink(`storage/${imagePath}`)
+          .then((e) => console.log(`successfuly deleted old image`))
+          .catch((err) => console.log(`error while deleting old image`));
+      }
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error : ${error}` });
       console.log(`server error : ${error}`);

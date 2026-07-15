@@ -324,7 +324,6 @@ connectionsRouter.post(
       const body = JSON.parse(req.body.message);
       const oldMessage = body.message;
       const room = body.room;
-      console.log(room);
       const updatedMessage = {
         from: oldMessage.from,
         to: oldMessage.to,

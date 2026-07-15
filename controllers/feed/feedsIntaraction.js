@@ -53,8 +53,6 @@ feedsIntaraction.put(
       //
       const postTotalLikesId = post[0].engamentStates.likesId;
       let isPostLIkedAlreadyByUser = false;
-      console.log(post[0].engamentStates.likesId);
-      console.log(userConnectionId);
       for (let i = 0; i < postTotalLikesId.length; i++) {
         if (postTotalLikesId[i].trim() === userConnectionId.trim()) {
           console.log(true);

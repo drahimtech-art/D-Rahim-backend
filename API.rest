@@ -4,9 +4,9 @@ X-Frontend-Key: 86d18ffe-09a5-43ef-8008-608dc117c4f476dae630-f1c6-4379-b8da-f110
 Content-Type: application/json
 
 {
-    "firstName" : "James",
-    "lastName" : "John",
-    "email" : "jamesjohn87@gmail.com",
+    "firstName" : "Victory",
+    "lastName" : "Nwanoruo",
+    "email" : "nwanoruovictory87@gmail.com",
     "password" : "1234",
     "dateOfBirth" : "07/14/2004",
     "phoneNumber": "08066859429",
