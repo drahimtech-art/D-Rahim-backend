@@ -306,7 +306,7 @@ feedsIntaraction.post(
 );
 //reply to comment
 feedsIntaraction.put(
-  "/reply/comments/",
+  "/reply/comments/:id",
   apiRequstValidation,
   validateUser,
   validateCommentsBody,
@@ -314,7 +314,7 @@ feedsIntaraction.put(
     try {
       const userId = res.tokenId;
       const commentToReplyId = req.body.commentToReplyId;
-      const postId = req.body.postId;
+      const postId = req.params.id;
       const body = req.body;
       const userConnectionId = body.connectionId;
       const commentContent = {
@@ -331,7 +331,7 @@ feedsIntaraction.put(
           ok: false,
           message: `invalid requst body one or more fileds not meat`,
         });
-      const getPost = await feedsPost.find({ postId: postId });
+      const getPost = await feedsPost.find({ postId: postId }).lean();
       if (getPost.length === 0)
         return res
           .status(404)
@@ -349,7 +349,7 @@ feedsIntaraction.put(
       const updatedPostedComments = [];
       for (let i = 0; i < postedComments.length; i++) {
         const comment = postedComments[i];
-        if (comment.connectionId === commentToReplyId) {
+        if (comment._id.toString().trim() === commentToReplyId.trim()) {
           const subComments = [...comment.subComments, commentContent];
           delete comment.subComments;
           const updatedComment = { ...comment, subComments: subComments };
@@ -358,13 +358,12 @@ feedsIntaraction.put(
           updatedPostedComments.push(comment);
         }
       }
+      console.log(updatedPostedComments);
       if (updatedPostedComments.length === 0)
-        return res
-          .status(403)
-          .json({
-            ok: false,
-            message: "somthing went wrong cant replay to comments at this time",
-          });
+        return res.status(403).json({
+          ok: false,
+          message: "somthing went wrong cant replay to comments at this time",
+        });
       //
       const userMediaIntrest = await userLearningData
         .find({
