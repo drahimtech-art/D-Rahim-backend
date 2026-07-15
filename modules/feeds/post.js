@@ -128,11 +128,6 @@ const postSchema = new Schema({
                     require: true,
                     default: Date.now,
                   },
-                  subComments: {
-                    type: Array,
-                    require: true,
-                    default: [],
-                  },
                 },
               ],
               require: true,

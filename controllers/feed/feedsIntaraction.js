@@ -154,6 +154,7 @@ async function validateCommentsBody(req, res, next) {
     console.log(`server error: ${error}`);
   }
 }
+//add top comments
 feedsIntaraction.put(
   "/comments/post/:id",
   apiRequstValidation,
@@ -262,6 +263,7 @@ feedsIntaraction.put(
     }
   },
 );
+//get comments authors
 feedsIntaraction.post(
   "/author/info/",
   apiRequstValidation,
@@ -299,6 +301,140 @@ feedsIntaraction.post(
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error: ${error}` });
       console.log(`server error: ${error}`);
+    }
+  },
+);
+//reply to comment
+feedsIntaraction.put(
+  "/reply/comments/",
+  apiRequstValidation,
+  validateUser,
+  validateCommentsBody,
+  async (req, res) => {
+    try {
+      const userId = res.tokenId;
+      const commentToReplyId = req.body.commentToReplyId;
+      const postId = req.body.postId;
+      const body = req.body;
+      const userConnectionId = body.connectionId;
+      const commentContent = {
+        connectionId: body.connectionId,
+        comment: body.comment,
+        likes: 0,
+        disLikes: 0,
+        date: body.date,
+        time: body.time,
+        createdAt: new Date(),
+      };
+      if (!postId || !commentToReplyId)
+        return res.status(400).json({
+          ok: false,
+          message: `invalid requst body one or more fileds not meat`,
+        });
+      const getPost = await feedsPost.find({ postId: postId });
+      if (getPost.length === 0)
+        return res
+          .status(404)
+          .json({ ok: false, message: `no post with the given id found` });
+      const authorId = getPost[0].connectionId;
+      const postHashTages = getPost[0].hashTages;
+      const postEngementsStats = getPost[0].engamentStates;
+      const postEngementsScore = getPost[0].engament;
+      const totalLikes = postEngementsScore.likes;
+      const totalComments = postEngementsScore.comments + 1;
+      //
+      const likesId = postEngementsStats.likesId;
+      const postedComments = postEngementsStats.comments;
+      //nested reply comment flow
+      const updatedPostedComments = [];
+      for (let i = 0; i < postedComments.length; i++) {
+        const comment = postedComments[i];
+        if (comment.connectionId === commentToReplyId) {
+          const subComments = [...comment.subComments, commentContent];
+          delete comment.subComments;
+          const updatedComment = { ...comment, subComments: subComments };
+          updatedPostedComments.push(updatedComment);
+        } else {
+          updatedPostedComments.push(comment);
+        }
+      }
+      if (updatedPostedComments.length === 0)
+        return res
+          .status(403)
+          .json({
+            ok: false,
+            message: "somthing went wrong cant replay to comments at this time",
+          });
+      //
+      const userMediaIntrest = await userLearningData
+        .find({
+          userId: userId,
+          connectionId: userConnectionId,
+        })
+        .lean();
+      if (userMediaIntrest.length === 0)
+        return res
+          .status(404)
+          .json({ ok: false, message: "user feeds media doc not found" });
+      //
+      const engaments = {
+        likes: totalLikes,
+        comments: totalComments,
+        shares: getPost[0].shares,
+      };
+      const engamentStates = {
+        likesId: likesId,
+        comments: updatedPostedComments,
+      };
+      //update authors post with likes added
+      const updatePost = await feedsPost.findOneAndUpdate(
+        { postId: postId },
+        { engament: engaments, engamentStates: engamentStates },
+      );
+      if (updatePost) {
+        //end of authors and response logic
+        res.status(200).json({
+          ok: true,
+          message: "Successfully replied to comment",
+          comment: commentContent,
+        });
+      }
+      //check if autor if post is a connection to user or just a global creator
+      const findPostAuthorInUserConnections = await userConnections
+        .find({
+          userId: userId,
+          contactId: authorId,
+        })
+        .lean();
+      const hashTagsInPost = [...postHashTages];
+      const userMediaIntaractionHashTags =
+        userMediaIntrest[0].mediaIntaractions.hashTags;
+      const isAuthorAConnectionToUser =
+        findPostAuthorInUserConnections.length !== 0 ? true : false;
+      //get media intaraction score
+      const userMediaIntaractionsScore =
+        userMediaIntaractionsScoreingAlgorithim(
+          userMediaIntrest[0],
+          isAuthorAConnectionToUser,
+          authorId,
+          hashTagsInPost,
+        );
+      if (userMediaIntaractionsScore) {
+        const mediaIntaractions = {
+          ...userMediaIntaractionsScore,
+        };
+        const updateUserFeedsLearningData =
+          await userLearningData.findOneAndUpdate(
+            { userId: userId, connectionId: userConnectionId },
+            { mediaIntaractions: mediaIntaractions },
+          );
+        if (updateUserFeedsLearningData) {
+          console.log("user feeds algorithim learning ;)");
+        }
+      }
+    } catch (error) {
+      res.status(500).json({ ok: false, message: `server error :${error}` });
+      console.log(`server error :${error}`);
     }
   },
 );

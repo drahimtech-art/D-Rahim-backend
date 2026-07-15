@@ -121,7 +121,9 @@ studentsDataRouter.put(
         await fsPromise
           .unlink(`storage/${imagePath}`)
           .then((e) => console.log(`successfuly deleted old image`))
-          .catch((err) => console.log(`error while deleting old image`));
+          .catch((err) =>
+            console.log(`error while deleting old image: ${err}`),
+          );
       }
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error : ${error}` });
