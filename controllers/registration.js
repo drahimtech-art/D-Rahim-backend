@@ -124,6 +124,7 @@ registrationRouter.post(
           code: process.env.STUDENT_CODE,
           type: "students",
         },
+        mentorshipPlan: "basic",
       });
       const addUser = await createUser.save();
       if (!addUser) throw new Error(addUser);
@@ -141,7 +142,7 @@ registrationRouter.post(
       const createFriendRequstStorage = new connectionsRequst({
         userId: addUser._id,
         connectionId: addUser.connectionId,
-        requstList: [],
+        requst: [],
         createdAt: new Date(),
       });
       const saveCreatedFriendRequstStorage =
@@ -149,6 +150,7 @@ registrationRouter.post(
       res.status(201).json({ ok: true, message: "succesfull" });
     } catch (error) {
       res.status(200).json({ ok: false, message: `server error: ${error} ` });
+      console.log(`server error: ${error} `);
     }
   },
 );

@@ -102,71 +102,55 @@ connectionsRouter.post(
           ok: false,
           message: "Contact exist in user connections list",
         });
-      const findContact = await userData
+      const findContact = await userData // for friend
         .find({ connectionId: contactId })
         .lean();
       if (findContact.length === 0)
-        return res
-          .status(404)
-          .json({ ok: false, message: "no user with the given id found" });
+        return res.status(404).json({
+          ok: false,
+          message: "no connection with the given id found",
+        });
       const hasConnectionToAddSentRequst = await connectionsRequst
         .find({
           userId: userId,
           connectionId: connectionId,
+          "requst.contactId": contactId,
         })
         .lean();
       if (hasConnectionToAddSentRequst.length !== 0) {
-        // accepy requst if friend to add sent user requst
-        const requstList = hasConnectionToAddSentRequst[0].requstList;
-        let isResutInList;
-        let foundData;
-        const updatedAndApprovedRequstList = [];
-        for (const requst of requstList) {
-          if (requst.contactId === contactId && !requst.isConnected) {
-            isResutInList = true;
-            const connectionRequstInfo = {
-              contactId: requst.contactId,
-              chatGroupId: requst.chatGroupId,
-              invite: true,
-              isConnected: true,
-              createdAt: requst.createdAt,
-            };
-            foundData = connectionRequstInfo;
-            updatedAndApprovedRequstList.push(connectionRequstInfo);
-          } else {
-            updatedAndApprovedRequstList.push(requst);
-          }
-        }
-        if (isResutInList) {
-          const acceptRequst = await connectionsRequst.findOneAndUpdate(
-            { userId: userId, connectionId: connectionId },
-            { requstList: updatedAndApprovedRequstList },
-          );
-          const upDateFriendContactInfor =
-            await userConnections.findOneAndUpdate(
-              { userId: findContact[0]._id, contactId: connectionId },
-              { isConnected: true },
-            );
-          const addConnection = new userConnections({
+        // accept requst if friend to add sent user requst
+        const acceptRequst = await connectionsRequst.findOneAndUpdate(
+          {
             userId: userId,
-            contactId: foundData.contactId,
-            chatGroupId: foundData.chatGroupId,
-            invite: foundData.invite,
-            isConnected: foundData.isConnected,
-            createdAt: new Date(),
+            connectionId: connectionId,
+            "requst.contactId": contactId,
+          },
+          { "requst.isConnected": true },
+        );
+        const upDateFriendContactInfor = await userConnections.findOneAndUpdate(
+          { userId: findContact[0]._id, contactId: connectionId },
+          { isConnected: true },
+        );
+        const addConnection = new userConnections({
+          userId: userId,
+          contactId: hasConnectionToAddSentRequst[0].requst.connectionId,
+          chatGroupId: hasConnectionToAddSentRequst[0].requst.chatGroupId,
+          invite: hasConnectionToAddSentRequst[0].requst.invite,
+          isConnected: true,
+          createdAt: new Date(),
+        });
+        const saveConatact = await addConnection.save();
+        if (!acceptRequst || !upDateFriendContactInfor || !saveConatact)
+          return res.status(500).json({
+            ok: false,
+            message:
+              "server error somthing went wrong when trying to validate user connection requst",
           });
-          const saveConatact = await addConnection.save();
-          if (!acceptRequst || !upDateFriendContactInfor || !saveConatact)
-            return res.status(500).json({
-              ok: false,
-              message:
-                "server error somthing went wrong when trying to validate user connection requst",
-            });
-          return res
-            .status(200)
-            .json({ ok: true, message: "connections succesful added" });
-        }
+        return res
+          .status(200)
+          .json({ ok: true, message: "connections succesful added" });
       }
+      //
       const chatGroupId = `${randomUUID()}$${contactId}`;
       const connectionInfoToBeSent = {
         contactId: connectionId,
@@ -175,13 +159,11 @@ connectionsRouter.post(
         isConnected: false,
         createdAt: new Date(),
       };
-      const sendRequst = await connectionsRequst.findOneAndUpdate(
-        {
-          userId: findContact[0]._id,
-          connectionId: findContact[0].connectionId,
-        },
-        { $push: { requstList: connectionInfoToBeSent } },
-      );
+      const sendRequst = await connectionsRequst.insertOne({
+        userId: findContact[0]._id,
+        connectionId: findContact[0].connectionId,
+        requst: connectionInfoToBeSent,
+      });
       if (!sendRequst)
         return res
           .status(500)
@@ -198,13 +180,7 @@ connectionsRouter.post(
         ...connectionInfoToAdded,
       });
       const responds = await addConnection.save();
-      const createMessageGroupForConnections = new contactMessage({
-        groupId: chatGroupId,
-        messages: [],
-        createdAt: new Date(),
-      });
-      const saveMessageGroup = await createMessageGroupForConnections.save();
-      if (!responds || !createMessageGroupForConnections)
+      if (!responds)
         return res.status(403).json({
           ok: false,
           message: `something went wrong can't add connection at this time`,
@@ -250,7 +226,7 @@ connectionsRouter.post(
         return res
           .status(404)
           .json({ ok: false, message: "No chat history found" });
-      const respondsList = findChatHistory[0].messages.map((e) => {
+      const respondsList = findChatHistory.messages.map((e) => {
         const dataFomart = {
           from: e.from,
           to: e.to,
@@ -359,20 +335,17 @@ connectionsRouter.get(
         .find({
           userId: userId,
           connectionId: connectionId,
+          "requst.isConnected": false,
         })
         .lean();
       const connectionsRequstlist = [];
-      if (
-        getAllConnectionsRequstListNotYetValidated.length !== 0 &&
-        getAllConnectionsRequstListNotYetValidated[0].requstList.length !== 0
-      ) {
+      if (getAllConnectionsRequstListNotYetValidated.length !== 0) {
         const filteredListOfNotValidatedRequst = [];
         const filteredListOfNotValidatedRequstId = [];
-        for (const requst of getAllConnectionsRequstListNotYetValidated[0]
-          .requstList) {
-          if (!requst.isConnected) {
-            filteredListOfNotValidatedRequst.push(requst);
-            filteredListOfNotValidatedRequstId.push(requst.contactId);
+        for (const data of getAllConnectionsRequstListNotYetValidated) {
+          if (!data.requst.isConnected) {
+            filteredListOfNotValidatedRequst.push(data.requst);
+            filteredListOfNotValidatedRequstId.push(data.requst.contactId);
           }
         }
         const getRequstConnectionsSendersInfor = await userData
@@ -449,65 +422,52 @@ connectionsRouter.get(
         if (findContact.length === 0)
           return res
             .status(404)
-            .json({ ok: false, message: "no user with the given id found" });
+            .json({
+              ok: false,
+              message: "no connection with the given id found",
+            });
         const connectionsRequstList = await connectionsRequst
           .find({
             userId: userId,
             connectionId: connectionId,
+            "requst.contactId": contactId,
           })
           .lean();
         if (connectionsRequstList.length !== 0) {
           // accepy requst if friend to add sent user requst
-          const requstList = connectionsRequstList[0].requstList;
-          let isResutInList;
-          let foundData;
-          const updatedAndApprovedRequstList = [];
-          for (const requst of requstList) {
-            if (requst.contactId === contactId && !requst.isConnected) {
-              isResutInList = true;
-              const connectionRequstInfo = {
-                contactId: requst.contactId,
-                chatGroupId: requst.chatGroupId,
-                invite: true,
-                isConnected: true,
-                createdAt: requst.createdAt,
-              };
-              foundData = connectionRequstInfo;
-              updatedAndApprovedRequstList.push(connectionRequstInfo);
-            } else {
-              updatedAndApprovedRequstList.push(requst);
-            }
-          }
-          if (isResutInList) {
-            const acceptRequst = await connectionsRequst.findOneAndUpdate(
-              { userId: userId, connectionId: connectionId },
-              { requstList: updatedAndApprovedRequstList },
-            );
-            const upDateFriendContactInfor =
-              await userConnections.findOneAndUpdate(
-                { userId: findContact[0]._id, contactId: connectionId },
-                { isConnected: true },
-              );
-            const addConnection = new userConnections({
+          const acceptRequst = await connectionsRequst.findOneAndUpdate(
+            {
               userId: userId,
-              contactId: foundData.contactId,
-              chatGroupId: foundData.chatGroupId,
-              invite: foundData.invite,
-              isConnected: foundData.isConnected,
-              createdAt: new Date(),
+              connectionId: connectionId,
+              "requst.contactId": contactId,
+            },
+            { "requst.isConnected": true },
+          );
+          const upDateFriendContactInfor =
+            await userConnections.findOneAndUpdate(
+              { userId: findContact[0]._id, contactId: connectionId },
+              { isConnected: true },
+            );
+          const addConnection = new userConnections({
+            userId: userId,
+            contactId: connectionsRequstList[0].requst.contactId,
+            chatGroupId: connectionsRequstList[0].requst.chatGroupId,
+            invite: connectionsRequstList[0].requst.invite,
+            isConnected: true,
+            createdAt: new Date(),
+          });
+          const saveConatact = await addConnection.save();
+          if (!acceptRequst || !upDateFriendContactInfor || !saveConatact)
+            return res.status(500).json({
+              ok: false,
+              message:
+                "server error somthing went wrong when trying to validate user connection requst",
             });
-            const saveConatact = await addConnection.save();
-            if (!acceptRequst || !upDateFriendContactInfor || !saveConatact)
-              return res.status(500).json({
-                ok: false,
-                message:
-                  "server error somthing went wrong when trying to validate user connection requst",
-              });
-            return res
-              .status(200)
-              .json({ ok: true, message: "connections succesful added" });
-          }
+          return res
+            .status(200)
+            .json({ ok: true, message: "connections succesful added" });
         }
+        //
         return res.status(404).json({
           ok: false,
           message: "no connection requst found in user records",

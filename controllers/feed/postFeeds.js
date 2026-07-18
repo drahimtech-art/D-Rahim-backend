@@ -35,8 +35,7 @@ postFeeds.post(
         !body.connectionId ||
         !body.caption ||
         !body.type ||
-        !body.date ||
-        !body.time ||
+        !body.postedAt ||
         !body.hashTages
       )
         return res.status(400).json({
@@ -51,8 +50,7 @@ postFeeds.post(
       const hashTages = contentBody.hashTages;
       const contentCaption = contentBody.caption;
       const contentType = contentBody.type;
-      const contentDate = contentBody.date;
-      const contentTime = contentBody.time;
+      const postedAt = body.postedAt;
       const postData = {
         connectionId: connectionId,
         engament: {
@@ -65,20 +63,25 @@ postFeeds.post(
           caption: contentCaption,
           content: `http://localhost:5000/feedsContent/${filename}`,
         },
-        engamentStates: {
-          likesId: [],
-          comments: [],
-        },
         postId: `${connectionId}$${randomUUID()}`,
+        postedAt: postedAt,
         hashTages: [...hashTages],
-        date: contentDate,
-        time: contentTime,
         createdAt: new Date(),
       };
       const createPost = new feedsPosts(postData);
       const savePost = await createPost.save();
       if (!savePost) throw new Error(savePost);
-      res.status(201).json({ ok: true, message: "succesful", post: postData });
+      const engamentStats = {
+        isPostLiked: false,
+        topPostComments: [],
+      };
+      res
+        .status(201)
+        .json({
+          ok: true,
+          message: "succesful",
+          post: { ...postData, engamentStats },
+        });
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error: ${error}` });
     }

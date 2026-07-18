@@ -47,6 +47,11 @@ feedsIntaraction.put(
           .status(404)
           .json({ ok: false, message: "user feeds media doc not found" });
       //
+      const getPost = await feedsPost.find({ postId: postId });
+      if (getPost.length === 0)
+        return res
+          .status(404)
+          .json({ ok: false, message: `no post with the given id found` });
       const validatePostWasLikedByUser = await postLikes
         .find({ postId: postId, connectionId: userConnectionId })
         .lean();
@@ -66,13 +71,19 @@ feedsIntaraction.put(
           .status(200)
           .json({ ok: true, message: "Successfully unliked post" });
       } else {
-        const unlikePost = await feedsPost.findOneAndUpdate(
+        const likeDoc = {
+          postId: postId,
+          connectionId: userConnectionId,
+          createdAt: new Date(),
+        };
+        const createLike = await postLikes.insertOne(likeDoc);
+        const likePost = await feedsPost.findOneAndUpdate(
           { postId: postId },
           { $inc: { "engament.likes": +1 } },
         );
         res.status(200).json({ ok: true, message: "Successfully liked post" });
       }
-
+      const authorId = getPost[0].connectionId;
       //check if autor post is a connection to user or just a global creator
       const findPostAuthorInUserConnections = await userConnections
         .find({
@@ -80,7 +91,7 @@ feedsIntaraction.put(
           contactId: authorId,
         })
         .lean();
-      const hashTagsInPost = [...postHashTages];
+      const hashTagsInPost = [...getPost[0].hashTages];
       const userMediaIntaractionHashTags =
         userMediaIntrest[0].mediaIntaractions.hashTags;
       const isAuthorAConnectionToUser =
@@ -108,7 +119,8 @@ feedsIntaraction.put(
         }
       }
     } catch (error) {
-      res.status(500).json({ ok: false, message: `server error: ${error}` });
+      //res.status(500).json({ ok: false, message: `server error: ${error}` });
+      console.log(`server error: ${error}`);
     }
   },
 );
@@ -188,12 +200,10 @@ feedsIntaraction.put(
       );
       const createComment = await postComments.insertOne(commentContent);
       if (!createComment)
-        return res
-          .status(500)
-          .json({
-            ok: false,
-            message: `server error somthing whent wrong while creating comment: ${createComment}`,
-          });
+        return res.status(500).json({
+          ok: false,
+          message: `server error somthing whent wrong while creating comment: ${createComment}`,
+        });
       //end of authors and response logic
       res.status(200).json({
         ok: true,
@@ -345,12 +355,10 @@ feedsIntaraction.put(
       //create commentReply
       const createCommentReply = await postComments.insertOne(commentContent);
       if (!createCommentReply)
-        return res
-          .status(500)
-          .json({
-            ok: false,
-            message: `server error somthing went wrong while trying to reply to comment ${createComment}`,
-          });
+        return res.status(500).json({
+          ok: false,
+          message: `server error somthing went wrong while trying to reply to comment ${createComment}`,
+        });
       //update parent reply count
       const upDateParentCommentCount = await postComments.findByIdAndUpdate(
         commentToReplyId,

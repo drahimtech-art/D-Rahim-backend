@@ -45,7 +45,7 @@ studentsDataRouter.put(
           .json({ ok: false, message: "invalid requst body" });
       //
       const isImage = req.file;
-      const imageUrl = `http://${req.headers.host}/studentsProfileImages/${isImage.filename}`;
+      const imageUrl = `http://${req.headers.host}/studentsProfileImages/${isImage && isImage.filename}`;
       const isUserInRecords = await userData.findById(userId);
       if (!isUserInRecords) {
         res.clearCookie("token");
@@ -92,16 +92,6 @@ studentsDataRouter.put(
         bio: bio,
         imageUrl: updatedImage,
       });
-      const updateUsersConnectionDataOfUser = await userConnections.updateMany(
-        {
-          contactId: isUserInRecords.connectionId,
-        },
-        {
-          contactFirstName: firstName,
-          contactLastName: lastName,
-          contactImage: updatedImage,
-        },
-      );
       if (!updateData) throw new Error("Somting went wrong will updating user");
       const userInfo = {
         firstName: firstName,

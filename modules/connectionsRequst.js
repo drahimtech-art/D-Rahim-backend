@@ -29,11 +29,20 @@ const connectionsRequstSchema = new Schema({
       },
       createdAt: { type: Date, required: true, default: Date.now },
     },
-
     required: true,
     default: [],
   },
   createdAt: { type: Date, required: true, default: Date.now },
+});
+connectionsRequstSchema.index({
+  userId: 1,
+  connectionId: 1,
+  "requst.isConnected": 1,
+});
+connectionsRequstSchema.index({
+  userId: 1,
+  connectionId: 1,
+  "requst.contactId": 1,
 });
 connectionsRequstSchema.index({ userId: 1, connectionId: 1 });
 const connectionsRequst = mongoose.model(

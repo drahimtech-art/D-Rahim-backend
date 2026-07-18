@@ -349,13 +349,13 @@ mediaFeeds.get(
             //check if post was liked by user
             const allPostLikedByUser = await postLikes
               .find({
-                postId: { $in: filtedListIds },
+                postId: { $in: filtrdPostIds },
                 connectionId: connectionId,
               })
               .lean();
             //get all top comments in post
             const allTopCommentsInPost = await postComments
-              .find({ postId: { $in: filtedListIds }, depth: { $eq: 0 } })
+              .find({ postId: { $in: filtrdPostIds }, depth: { $eq: 0 } })
               .sort({ likesCount: -1, createdAt: -1 })
               .lean();
             //order everthing together
