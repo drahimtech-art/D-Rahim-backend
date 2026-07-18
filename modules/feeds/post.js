@@ -50,103 +50,12 @@ const postSchema = new Schema({
     type: Object,
     require: true,
   },
-  engamentStates: {
-    likesId: {
-      type: Array,
-      require: true,
-    },
-    comments: {
-      type: Array,
-      require: true,
-    },
-    type: {
-      likesId: {
-        type: [String],
-        require: true,
-      },
-      comments: {
-        type: [
-          {
-            connectionId: {
-              type: String,
-              require: true,
-            },
-            comment: {
-              type: String,
-              require: true,
-            },
-            likes: {
-              type: Number,
-              require: true,
-            },
-            disLikes: {
-              type: Number,
-              require: true,
-            },
-            date: {
-              type: String,
-              require: true,
-            },
-            time: {
-              type: String,
-              require: true,
-            },
-            createdAt: {
-              type: Date,
-              require: true,
-              default: Date.now,
-            },
-            subComments: {
-              type: [
-                {
-                  connectionId: {
-                    type: String,
-                    require: true,
-                  },
-                  comment: {
-                    type: String,
-                    require: true,
-                  },
-                  likes: {
-                    type: Number,
-                    require: true,
-                  },
-                  disLikes: {
-                    type: Number,
-                    require: true,
-                  },
-                  date: {
-                    type: String,
-                    require: true,
-                  },
-                  time: {
-                    type: String,
-                    require: true,
-                  },
-                  createdAt: {
-                    type: Date,
-                    require: true,
-                    default: Date.now,
-                  },
-                },
-              ],
-              require: true,
-              default: [],
-            },
-          },
-        ],
-        require: true,
-        default: [],
-      },
-    },
-    require: true,
-  },
   postId: {
     type: String,
     require: true,
   },
   hashTages: {
-    type: Array,
+    type: [String],
     require: true,
   },
   date: {
@@ -159,9 +68,9 @@ const postSchema = new Schema({
   },
   createdAt: { type: Date, require: true, default: Date.now },
 });
-postSchema.index({ connectionId: 1, postId: 1, createdAt: -1 });
-postSchema.index({ hashTages: 1, createdAt: -1 });
-postSchema.index({ engament: 1, createdAt: -1 });
-postSchema.index({ postId: 1 });
+postSchema.index({ connectionId: 1, createdAt: -1 }); //query post for connections newset post
+postSchema.index({ hashTages: 1, createdAt: -1 }); // query post for hashTags in new posts
+postSchema.index({ engament: 1, createdAt: -1 }); // query post for top likes and newest
+postSchema.index({ postId: 1 }); // query post for post
 const postData = mongoose.model("feedPost", postSchema);
 module.exports = postData;
