@@ -3,6 +3,7 @@ function userMediaIntaractionsScoreingAlgorithim(
   isAuthorAConnectionToUser,
   authorId,
   hashTagsInPost,
+  isEngamentOrDisEngament,
 ) {
   try {
     const userMediaIntrest = { ...data };
@@ -21,7 +22,10 @@ function userMediaIntaractionsScoreingAlgorithim(
           const connectionsData = {
             connectionId: userMediaIntaractionConnections[i].connectionId,
           };
-          if (connectionsData.connectionId === authorId) {
+          if (
+            connectionsData.connectionId === authorId &&
+            isEngamentOrDisEngament
+          ) {
             const rate = userMediaIntaractionConnections[i].rate;
             const upDateConnectionsDataAndRate = {
               ...connectionsData,
@@ -43,6 +47,7 @@ function userMediaIntaractionsScoreingAlgorithim(
               );
               connectionsIdAdded.push(connectionsData.connectionId);
             }
+            connectionsIdAdded.push(connectionsData.connectionId);
           }
           if (
             i + 1 === userMediaIntaractionConnections.length &&
@@ -86,7 +91,10 @@ function userMediaIntaractionsScoreingAlgorithim(
           const connectionsData = {
             connectionId: userMediaIntaractionGlobalConnections[i].connectionId,
           };
-          if (connectionsData.connectionId === authorId) {
+          if (
+            connectionsData.connectionId === authorId &&
+            isEngamentOrDisEngament
+          ) {
             const rate = userMediaIntaractionGlobalConnections[i].rate;
             const upDateConnectionsDataAndRate = {
               ...connectionsData,
@@ -108,6 +116,7 @@ function userMediaIntaractionsScoreingAlgorithim(
               );
               globalConnectionsId.push(connectionsData.connectionId);
             }
+            globalConnectionsId.push(connectionsData.connectionId);
           }
           if (i + 1 === userMediaIntaractionGlobalConnections) {
             const newGlobalConnectionData = {
@@ -160,12 +169,22 @@ function userMediaIntaractionsScoreingAlgorithim(
               userHashTags[j].tag.trim() === postHashTag &&
               !addedUserHashTagesWithPostHashTags.includes(postHashTag)
             ) {
-              const rate = userHashTags[j].rate + 0.2;
-              userHashTagesWithPostHashTags.push({
-                ...hashTagsData,
-                rate: rate,
-              });
-              addedUserHashTagesWithPostHashTags.push(postHashTag);
+              const rate = userHashTags[j].rate;
+              let totalRate;
+              if (isEngamentOrDisEngament) {
+                totalRate = rate + 0.2;
+              } else {
+                totalRate = rate - 0.05;
+              }
+              if (totalRate > 0) {
+                userHashTagesWithPostHashTags.push({
+                  ...hashTagsData,
+                  rate: totalRate,
+                });
+                addedUserHashTagesWithPostHashTags.push(postHashTag);
+              } else {
+                addedUserHashTagesWithPostHashTags.push(postHashTag);
+              }
             }
             if (
               j + 1 === userHashTags.length &&

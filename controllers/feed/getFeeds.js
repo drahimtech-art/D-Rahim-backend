@@ -2,6 +2,8 @@ const express = require("express");
 const mediaFeeds = express.Router();
 const userLeaingData = require("../../modules/feeds/userLearningData/userLearningData.js");
 const feedsPosts = require("../../modules/feeds/post.js");
+const postLikes = require("../../modules/feeds/postLikes.js");
+const postComments = require("../../modules/feeds/postComments.js");
 const userData = require("../../modules/studentUser.js");
 //middlewares
 const apiRequstValidation = require("../../middlewares/apiValidation.js");
@@ -291,6 +293,7 @@ mediaFeeds.get(
           if (sortByScore.length !== 0) {
             const filtedList = [];
             const filtedListIds = [];
+            const filtrdPostIds = [];
             let count = 0;
             for (const post of sortByScore) {
               if (count >= 100) break;
@@ -298,6 +301,7 @@ mediaFeeds.get(
               delete data.totalScore;
               filtedList.push(data);
               filtedListIds.push(data.connectionId);
+              filtrdPostIds.push(data.postId);
               count += 1;
             }
             //get author infor
@@ -319,8 +323,10 @@ mediaFeeds.get(
                 ok: false,
                 message: "somthing whent wrong post autors infor not gound",
               });
+            //
+            const orderedFeedsPost = []; // order array to be sent back
             // arrange authors infor with authors post in feeds
-            const orderedFeedsPost = [];
+            const postWithAuthors = [];
             for (let i = 0; i < filtedList.length; i++) {
               for (let j = 0; j < getAuthorInfor.length; j++) {
                 // comparing function
@@ -335,9 +341,60 @@ mediaFeeds.get(
                     ...authorsInfo,
                     ...postData,
                   };
-                  orderedFeedsPost.push(olderPostInfo);
+                  postWithAuthors.push(olderPostInfo);
+                  break;
                 }
               }
+            }
+            //check if post was liked by user
+            const allPostLikedByUser = await postLikes
+              .find({
+                postId: { $in: filtedListIds },
+                connectionId: connectionId,
+              })
+              .lean();
+            //get all top comments in post
+            const allTopCommentsInPost = await postComments
+              .find({ postId: { $in: filtedListIds }, depth: { $eq: 0 } })
+              .sort({ likesCount: -1, createdAt: -1 })
+              .lean();
+            //order everthing together
+            for (let p = 0; p < postWithAuthors.length; p++) {
+              // top layer loop for post
+              const post = postWithAuthors[p]; // post in post with authors
+              let isPostLiked = false;
+              const topPostComments = []; //for a single post all top comments list
+              //
+              for (let l = 0; l < allPostLikedByUser.length; l++) {
+                // second loop to compare post with like docs if post was liked by user
+                const likeDoc = allPostLikedByUser[l];
+                if (likeDoc.postId === post.postId) {
+                  // validate if post was liked
+                  isPostLiked = true;
+                  break; //validates if post was liked break early else check all true now since we have like to be false initaily we dont have to validate if it wasent liked its validated by default
+                }
+              }
+              //
+              for (let c = 0; c < allTopCommentsInPost.length; c++) {
+                //c++ haha
+                //third scope loop all comments and filter out all comments that belongs to post;
+                const comment = allTopCommentsInPost[c];
+                if (comment.postId === post.postId) {
+                  // validate comments belongs to post and add to list this loops all through and filter out comments that belongs to post
+                  topPostComments.push(comment);
+                }
+              }
+              //add filted stats to post data
+              const engamentStats = {
+                isPostLiked: isPostLiked,
+                topPostComments: topPostComments,
+              };
+              const orderedPostData = {
+                ...post,
+                ...engamentStats,
+              };
+              //if all filters are done push to ordered list to be sent back to client
+              orderedFeedsPost.push(orderedPostData);
             }
             // suffle result
             function shuffle(list) {

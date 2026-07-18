@@ -3,6 +3,8 @@ const feedsIntaraction = express.Router();
 const feedsPost = require("../../modules/feeds/post.js");
 const userLearningData = require("../../modules/feeds/userLearningData/userLearningData.js");
 const userConnections = require("../../modules/userConnections.js");
+const postLikes = require("../../modules/feeds/postLikes.js");
+const postComments = require("../../modules/feeds/postComments.js");
 const userData = require("../../modules/studentUser.js");
 //middlewares
 const apiRequstValidation = require("../../middlewares/apiValidation.js");
@@ -34,12 +36,6 @@ feedsIntaraction.put(
           ok: false,
           message: "invalide requst connection id is required",
         });
-      //get post
-      const post = await feedsPost.find({ postId: postId }).lean();
-      if (post.length === 0)
-        return res
-          .status(404)
-          .json({ ok: false, message: `no post with the given id found` });
       const userMediaIntrest = await userLearningData
         .find({
           userId: userId,
@@ -51,46 +47,33 @@ feedsIntaraction.put(
           .status(404)
           .json({ ok: false, message: "user feeds media doc not found" });
       //
-      const postTotalLikesId = post[0].engamentStates.likesId;
-      let isPostLIkedAlreadyByUser = false;
-      for (let i = 0; i < postTotalLikesId.length; i++) {
-        if (postTotalLikesId[i].trim() === userConnectionId.trim()) {
-          console.log(true);
-          isPostLIkedAlreadyByUser = true;
-          break;
-        }
-      }
-      if (isPostLIkedAlreadyByUser)
-        return res
+      const validatePostWasLikedByUser = await postLikes
+        .find({ postId: postId, connectionId: userConnectionId })
+        .lean();
+      let isPostLIkedAlreadyByUser =
+        validatePostWasLikedByUser.length !== 0 ? true : false;
+      if (isPostLIkedAlreadyByUser) {
+        // if post was liked unlike post
+        const deleteUserLikedDoc = await postLikes.findOneAndDelete({
+          postId: postId,
+          connectionId: userConnectionId,
+        });
+        const unlikePost = await feedsPost.findOneAndUpdate(
+          { postId: postId },
+          { $inc: { "engament.likes": -1 } },
+        );
+        res
           .status(200)
-          .json({ ok: true, message: "post already liked by user" });
-      const authorId = post[0].connectionId;
-      const postHashTages = post[0].hashTages;
-      const postTotalLikes = isPostLIkedAlreadyByUser
-        ? post[0].engament.likes
-        : post[0].engament.likes + 1;
-      const updatedPostTotalLikesId = isPostLIkedAlreadyByUser
-        ? [...postTotalLikesId]
-        : [...postTotalLikesId, userConnectionId];
-      const engaments = {
-        likes: postTotalLikes,
-        comments: post[0].engament.comments,
-        shares: post[0].shares,
-      };
-      const engamentStates = {
-        likesId: updatedPostTotalLikesId,
-        comments: post[0].engamentStates.comments,
-      };
-      //update authors post with likes added
-      const updatePost = await feedsPost.findOneAndUpdate(
-        { postId: postId },
-        { engament: engaments, engamentStates: engamentStates },
-      );
-      if (updatePost) {
-        //end of authors and response logic
+          .json({ ok: true, message: "Successfully unliked post" });
+      } else {
+        const unlikePost = await feedsPost.findOneAndUpdate(
+          { postId: postId },
+          { $inc: { "engament.likes": +1 } },
+        );
         res.status(200).json({ ok: true, message: "Successfully liked post" });
       }
-      //check if autor if post is a connection to user or just a global creator
+
+      //check if autor post is a connection to user or just a global creator
       const findPostAuthorInUserConnections = await userConnections
         .find({
           userId: userId,
@@ -109,6 +92,7 @@ feedsIntaraction.put(
           isAuthorAConnectionToUser,
           authorId,
           hashTagsInPost,
+          !isPostLIkedAlreadyByUser,
         );
       if (userMediaIntaractionsScore) {
         const mediaIntaractions = {
@@ -143,7 +127,7 @@ async function validateCommentsBody(req, res, next) {
         ok: false,
         message: "invalide requst connection id is required",
       });
-    if (!body.comment || !body.date || !body.time)
+    if (!body.comment || !body.commentedAt)
       return res.status(400).json({
         ok: false,
         message: `invalide comment body one or more fileds are required`,
@@ -166,22 +150,18 @@ feedsIntaraction.put(
       const postId = req.params.id;
       const body = req.body;
       const commentContent = {
-        connectionId: body.connectionId,
+        postId: postId,
+        parentId: postId,
+        depth: 0,
+        authorId: body.connectionId,
         comment: body.comment,
-        likes: 0,
-        disLikes: 0,
-        date: body.date,
-        time: body.time,
+        likesCount: 0,
+        dislikeCount: 0,
+        replyCount: 0,
+        commentedAt: body.commentedAt,
         createdAt: new Date(),
-        subComments: [],
       };
       const userConnectionId = body.connectionId;
-      //get post
-      const post = await feedsPost.find({ postId: postId }).lean();
-      if (post.length === 0)
-        return res
-          .status(404)
-          .json({ ok: false, message: `no post with the given id found` });
       const userMediaIntrest = await userLearningData
         .find({
           userId: userId,
@@ -193,37 +173,33 @@ feedsIntaraction.put(
           .status(404)
           .json({ ok: false, message: "user feeds media doc not found" });
       //
+      const post = await feedsPost.find({ postId: postId }).lean();
+      if (post.length === 0)
+        return res
+          .status(404)
+          .json({ ok: false, message: `no post with the given id found` });
+      //
       const authorId = post[0].connectionId;
       const postHashTages = post[0].hashTages;
-      const postTotalLikes = post[0].engament.likes;
-      const updatedCommentsCount = post[0].engament.comments + 1;
-      const updatedCommentsData = [
-        ...post[0].engamentStates.comments,
-        commentContent,
-      ];
-      const postLikesId = post[0].engamentStates.likesId;
-      const engaments = {
-        likes: postTotalLikes,
-        comments: updatedCommentsCount,
-        shares: post[0].shares,
-      };
-      const engamentStates = {
-        likesId: postLikesId,
-        comments: updatedCommentsData,
-      };
-      //update authors post with likes added
+      //update post comment count
       const updatePost = await feedsPost.findOneAndUpdate(
         { postId: postId },
-        { engament: engaments, engamentStates: engamentStates },
+        { $inc: { "engament.comments": +1 } },
       );
-      if (updatePost) {
-        //end of authors and response logic
-        res.status(200).json({
-          ok: true,
-          message: "Successfully commented on post",
-          comment: commentContent,
-        });
-      }
+      const createComment = await postComments.insertOne(commentContent);
+      if (!createComment)
+        return res
+          .status(500)
+          .json({
+            ok: false,
+            message: `server error somthing whent wrong while creating comment: ${createComment}`,
+          });
+      //end of authors and response logic
+      res.status(200).json({
+        ok: true,
+        message: "Successfully commented on post",
+        comment: createComment,
+      });
       //check if autor if post is a connection to user or just a global creator
       const findPostAuthorInUserConnections = await userConnections
         .find({
@@ -243,6 +219,7 @@ feedsIntaraction.put(
           isAuthorAConnectionToUser,
           authorId,
           hashTagsInPost,
+          true,
         );
       if (userMediaIntaractionsScore) {
         const mediaIntaractions = {
@@ -317,15 +294,6 @@ feedsIntaraction.put(
       const postId = req.params.id;
       const body = req.body;
       const userConnectionId = body.connectionId;
-      const commentContent = {
-        connectionId: body.connectionId,
-        comment: body.comment,
-        likes: 0,
-        disLikes: 0,
-        date: body.date,
-        time: body.time,
-        createdAt: new Date(),
-      };
       if (!postId || !commentToReplyId)
         return res.status(400).json({
           ok: false,
@@ -336,34 +304,20 @@ feedsIntaraction.put(
         return res
           .status(404)
           .json({ ok: false, message: `no post with the given id found` });
+
       const authorId = getPost[0].connectionId;
       const postHashTages = getPost[0].hashTages;
-      const postEngementsStats = getPost[0].engamentStates;
-      const postEngementsScore = getPost[0].engament;
-      const totalLikes = postEngementsScore.likes;
-      const totalComments = postEngementsScore.comments + 1;
-      //
-      const likesId = postEngementsStats.likesId;
-      const postedComments = postEngementsStats.comments;
-      //nested reply comment flow
-      const updatedPostedComments = [];
-      for (let i = 0; i < postedComments.length; i++) {
-        const comment = postedComments[i];
-        if (comment._id.toString().trim() === commentToReplyId.trim()) {
-          const subComments = [...comment.subComments, commentContent];
-          delete comment.subComments;
-          const updatedComment = { ...comment, subComments: subComments };
-          updatedPostedComments.push(updatedComment);
-        } else {
-          updatedPostedComments.push(comment);
-        }
-      }
-      console.log(updatedPostedComments);
-      if (updatedPostedComments.length === 0)
+      //get depth of parent comment
+      const getParentComment = await postComments
+        .findById(commentToReplyId)
+        .lean();
+      if (!getParentComment)
         return res.status(403).json({
           ok: false,
-          message: "somthing went wrong cant replay to comments at this time",
+          message:
+            "somthing went wrong cant replay to comments as no parent was found",
         });
+      const depth = getParentComment.depth;
       //
       const userMediaIntrest = await userLearningData
         .find({
@@ -376,28 +330,39 @@ feedsIntaraction.put(
           .status(404)
           .json({ ok: false, message: "user feeds media doc not found" });
       //
-      const engaments = {
-        likes: totalLikes,
-        comments: totalComments,
-        shares: getPost[0].shares,
+      const commentContent = {
+        postId: postId,
+        parentId: commentToReplyId,
+        depth: depth + 1,
+        authorId: body.connectionId,
+        comment: body.comment,
+        likesCount: 0,
+        dislikeCount: 0,
+        replyCount: 0,
+        commentedAt: body.commentedAt,
+        createdAt: new Date(),
       };
-      const engamentStates = {
-        likesId: likesId,
-        comments: updatedPostedComments,
-      };
-      //update authors post with likes added
-      const updatePost = await feedsPost.findOneAndUpdate(
-        { postId: postId },
-        { engament: engaments, engamentStates: engamentStates },
+      //create commentReply
+      const createCommentReply = await postComments.insertOne(commentContent);
+      if (!createCommentReply)
+        return res
+          .status(500)
+          .json({
+            ok: false,
+            message: `server error somthing went wrong while trying to reply to comment ${createComment}`,
+          });
+      //update parent reply count
+      const upDateParentCommentCount = await postComments.findByIdAndUpdate(
+        commentToReplyId,
+        { $inc: { replyCount: +1 } },
       );
-      if (updatePost) {
-        //end of authors and response logic
-        res.status(200).json({
-          ok: true,
-          message: "Successfully replied to comment",
-          comment: commentContent,
-        });
-      }
+      //end of authors and response logic
+      res.status(200).json({
+        ok: true,
+        message: "Successfully replied to comment",
+        comment: commentContent,
+      });
+
       //check if autor if post is a connection to user or just a global creator
       const findPostAuthorInUserConnections = await userConnections
         .find({
@@ -417,6 +382,7 @@ feedsIntaraction.put(
           isAuthorAConnectionToUser,
           authorId,
           hashTagsInPost,
+          true,
         );
       if (userMediaIntaractionsScore) {
         const mediaIntaractions = {

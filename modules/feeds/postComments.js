@@ -33,6 +33,7 @@ const commentsSchema = new Schema({
     type: Number,
     required: true,
   },
+  commentedAt: { type: Date, required: true },
   createdAt: { type: Date, required: true, default: Date.now },
 });
 commentsSchema.index({ postId: 1, depth: 1, likesCount: 1, createdAt: -1 }); //query for top comments
