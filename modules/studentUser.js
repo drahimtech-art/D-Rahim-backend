@@ -49,6 +49,11 @@ const userShema = new Schema({
     type: Object,
     required: true,
   },
+  mentorshipPlan: {
+    type: String,
+    required: true,
+  },
+  createdAt: { type: Date, required: true, default: Date.now },
 });
 userShema.index({ email: 1, connectionId: -1 });
 userShema.index({ connectionId: 1 });

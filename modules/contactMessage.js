@@ -7,8 +7,7 @@ const messageSchema = new Schema(
     type: { type: String, required: true },
     imgUrl: { type: String, required: false },
     date: { type: String, required: true },
-    time: { type: String, required: true },
-    text: { type: String, required: false },
+    sentAt: { type: Date, required: true },
     createdAt: { type: Date, default: Date.now },
   },
   { _id: false },
@@ -21,7 +20,7 @@ const groupChatSchema = new Schema({
   messages: messageSchema,
   createdAt: { type: Date, default: Date.now },
 });
-groupChatSchema.index({ groupId: 1, "messages.createdAt": 1 });
+groupChatSchema.index({ groupId: 1, createdAt: -1 });
 groupChatSchema.index({ groupId: 1 });
 const connnectionMessageSchema = mongoose.model(
   "connectionMassages",

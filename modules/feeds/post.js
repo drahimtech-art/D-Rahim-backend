@@ -3,70 +3,63 @@ const Schema = mongoose.Schema;
 const postSchema = new Schema({
   connectionId: {
     type: String,
-    require: true,
+    required: true,
   },
   engament: {
     likes: {
       type: Number,
-      require: true,
+      required: true,
     },
     comments: {
       type: Number,
-      require: true,
+      required: true,
     },
     shares: {
       type: Number,
-      require: true,
+      required: true,
     },
     type: {
       likes: {
         type: Number,
-        require: true,
+        required: true,
       },
       comments: {
         type: Number,
-        require: true,
+        required: true,
       },
       shares: {
         type: Number,
-        require: true,
+        required: true,
       },
     },
-    require: true,
+    required: true,
   },
   content: {
     type: {
       type: String,
-      require: true,
+      required: true,
     },
     caption: {
       type: String,
-      require: true,
+      required: true,
     },
     content: {
       type: String,
-      require: true,
+      required: true,
     },
     type: Object,
-    require: true,
+    required: true,
   },
   postId: {
     type: String,
-    require: true,
+    required: true,
   },
   hashTages: {
     type: [String],
-    require: true,
+    required: true,
   },
-  date: {
-    type: String,
-    require: true,
-  },
-  time: {
-    type: String,
-    require: true,
-  },
-  createdAt: { type: Date, require: true, default: Date.now },
+  postedAt: { type: Date, required: true },
+  createdAt: { type: Date, required: true, default: Date.now },
 });
 postSchema.index({ connectionId: 1, createdAt: -1 }); //query post for connections newset post
 postSchema.index({ hashTages: 1, createdAt: -1 }); // query post for hashTags in new posts

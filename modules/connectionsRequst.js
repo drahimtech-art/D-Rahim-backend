@@ -9,28 +9,27 @@ const connectionsRequstSchema = new Schema({
     type: String,
     required: true,
   },
-  requstList: {
-    type: [
-      {
-        contactId: {
-          type: String,
-          required: true,
-        },
-        chatGroupId: {
-          type: String,
-          required: true,
-        },
-        invite: {
-          type: Boolean,
-          required: true,
-        },
-        isConnected: {
-          type: Boolean,
-          required: true,
-        },
-        createdAt: { type: Date, required: true, default: Date.now },
+  requst: {
+    type: {
+      contactId: {
+        type: String,
+        required: true,
       },
-    ],
+      chatGroupId: {
+        type: String,
+        required: true,
+      },
+      invite: {
+        type: Boolean,
+        required: true,
+      },
+      isConnected: {
+        type: Boolean,
+        required: true,
+      },
+      createdAt: { type: Date, required: true, default: Date.now },
+    },
+
     required: true,
     default: [],
   },

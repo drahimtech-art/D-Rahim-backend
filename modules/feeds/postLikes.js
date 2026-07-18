@@ -15,6 +15,6 @@ const likesSchema = new Schema({
     default: Date.now,
   },
 });
-likesSchema.index({ postId: 1, connectionId: 1 });
+likesSchema.index({ postId: 1, connectionId: 1 }); // query for if user liked post
 const postLikes = mongoose.model("postLikes", likesSchema);
 module.exports = postLikes;
