@@ -219,25 +219,26 @@ connectionsRouter.post(
       const groupId = body.groupId;
       const findChatHistory = await contactMessage
         .find({ groupId: groupId })
-        .sort({ "messages.createdAt": -1 })
+        .sort({ createdAt: -1 })
         .limit(50)
         .lean();
       if (findChatHistory.length === 0)
         return res
           .status(404)
           .json({ ok: false, message: "No chat history found" });
-      const respondsList = findChatHistory.messages.map((e) => {
-        const dataFomart = {
-          from: e.from,
-          to: e.to,
-          type: e.type,
-          imgUrl: e.imgUrl,
-          date: e.date,
-          time: e.time,
-          text: e.text,
-        };
-        return dataFomart;
-      });
+      const respondsList = findChatHistory
+        .map((e) => {
+          const dataFomart = {
+            from: e.messages.from,
+            to: e.messages.to,
+            type: e.messages.type,
+            imgUrl: e.messages.imgUrl,
+            sentAt: e.messages.sentAt,
+            text: e.messages.text,
+          };
+          return dataFomart;
+        })
+        .reverse();
       res.status(200).json({
         ok: true,
         message: "chat records retrived succesfull",
@@ -420,12 +421,10 @@ connectionsRouter.get(
           .find({ connectionId: contactId })
           .lean();
         if (findContact.length === 0)
-          return res
-            .status(404)
-            .json({
-              ok: false,
-              message: "no connection with the given id found",
-            });
+          return res.status(404).json({
+            ok: false,
+            message: "no connection with the given id found",
+          });
         const connectionsRequstList = await connectionsRequst
           .find({
             userId: userId,

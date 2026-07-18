@@ -6,7 +6,7 @@ const messageSchema = new Schema(
     to: { type: String, required: true },
     type: { type: String, required: true },
     imgUrl: { type: String, required: false },
-    date: { type: String, required: true },
+    text: { type: String, required: true },
     sentAt: { type: Date, required: true },
     createdAt: { type: Date, default: Date.now },
   },

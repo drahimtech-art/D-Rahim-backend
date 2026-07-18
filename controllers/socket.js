@@ -12,24 +12,34 @@ const io = new Server(serverPort, {
 });
 
 //middleware
-function validateUser(socket) {
-  const token = socket.handshake.headers.cookie.split("=")[1];
-  const isUser = userValidation.verify(token, process.env.ACCESS_TOKEN);
-  if (!isUser) return socket.disconnect();
+async function validateUser(socket) {
+  try {
+    const token = socket.handshake.headers.cookie.split("=")[1];
+    const isUser = userValidation.verify(token, process.env.ACCESS_TOKEN);
+    if (!isUser) return socket.disconnect();
+  } catch (error) {
+    console.log(`server error validating user socket requst ${error}`);
+  }
 }
-function validateClient(socket) {
-  const clientId = socket.handshake.headers["x-frontend-key"];
-  if (clientId !== process.env.CLIENT_KEY) return socket.disconnect();
+async function validateClient(socket) {
+  try {
+    const clientId = socket.handshake.headers["x-frontend-key"];
+    if (clientId !== process.env.CLIENT_KEY) return socket.disconnect();
+  } catch (error) {
+    console.log(
+      `server error validating which client requst socket requst ${error}`,
+    );
+  }
 }
 // save chat to db func
 
 async function saveChatToDB(chatId, messages) {
   try {
-    const addChatToList = await contactMessages.findOneAndUpdate(
-      { groupId: chatId },
-      { $push: { messages: { ...messages, createdAt: new Date() } } },
-      { runValidators: true },
-    );
+    const addChatToList = await contactMessages.insertOne({
+      groupId: chatId,
+      messages: messages,
+      createdAt: new Date(),
+    });
     if (addChatToList) {
       console.log("Chat history created succesfull");
     } else {
@@ -56,8 +66,8 @@ async function sendFileEvents(messages, room) {
 io.on("connection", async (socket) => {
   try {
     //middleware
-    validateUser(socket);
-    validateClient(socket);
+    await validateUser(socket);
+    await validateClient(socket);
     //
     console.log(socket.id);
     socket.on("join-room", (room) => {
