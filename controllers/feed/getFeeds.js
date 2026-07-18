@@ -293,7 +293,7 @@ mediaFeeds.get(
             const filtedListIds = [];
             let count = 0;
             for (const post of sortByScore) {
-              if (count >= 200) break;
+              if (count >= 100) break;
               const data = { ...post };
               delete data.totalScore;
               filtedList.push(data);

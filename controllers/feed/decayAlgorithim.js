@@ -17,6 +17,7 @@ function decayStats(p, gc, fc, uc) {
   const commentScore = post.engament.comments * 0.5;
   const agedScore = 100 * Math.pow(0.5, daysPassed / createdAtHalfLife);
   const engamentScore = likesScore + shares + commentScore;
+  console.log(shares);
   let friendsOrGlobalConnectionsScore = 0;
   // if post is from global person of creator user intaract with
   if (
@@ -47,6 +48,7 @@ function decayStats(p, gc, fc, uc) {
     ...post,
     totalScore: Math.max(totalScore, 0.1),
   };
+
   return result;
 }
 

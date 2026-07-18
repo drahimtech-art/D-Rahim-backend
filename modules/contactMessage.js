@@ -18,11 +18,7 @@ const groupChatSchema = new Schema({
     type: String,
     required: true,
   },
-  messages: {
-    type: [messageSchema],
-    required: true,
-    default: [],
-  },
+  messages: messageSchema,
   createdAt: { type: Date, default: Date.now },
 });
 groupChatSchema.index({ groupId: 1, "messages.createdAt": 1 });
