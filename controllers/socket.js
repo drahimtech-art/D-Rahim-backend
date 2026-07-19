@@ -2,6 +2,7 @@ const { Server } = require("socket.io");
 const userValidation = require("jsonwebtoken");
 const contactMessages = require("../modules/contactMessage");
 const getServer = require("../server");
+const { onlineUsers } = require("./cache/cache");
 const serverPort = getServer();
 //contect to socket
 const io = new Server(serverPort, {
@@ -72,15 +73,14 @@ io.on("connection", async (socket) => {
     console.log(socket.id);
     socket.on("join-room", (room) => {
       socket.join(room);
+      onlineUsers.add(room);
     });
     socket.on("leave-room", (room) => {
       socket.leave(room);
+      onlineUsers.delete(room);
     });
-    socket.on("isOnline", (room, senderRoom) => {
-      socket.to(room).emit("areYouOnline", senderRoom);
-    });
-    socket.on("amOnline", (room, state) => {
-      socket.to(room).emit("online", state);
+    socket.on("isOnline", (room, callback) => {
+      callback(onlineUsers.has(room));
     });
 
     socket.on("send-message", (messages, room) => {
