@@ -425,13 +425,7 @@ feedsIntaraction.post("/post/sub/comments/:id", async (req, res) => {
   try {
     const postId = req.params.id;
     const commentsParentId = req.body.commentsParentId;
-    const commentsAuthorsIds = req.body.commentsAuthorsIds;
-    if (
-      !postId ||
-      !commentsAuthorsIds ||
-      commentsAuthorsIds.length === 0 ||
-      !commentsParentId
-    )
+    if (!postId || !commentsParentId)
       return res.status(400).json({
         ok: false,
         message: `invalid requst body one or more fileds not meat`,
@@ -448,6 +442,11 @@ feedsIntaraction.post("/post/sub/comments/:id", async (req, res) => {
       return res
         .status(404)
         .json({ ok: false, message: `no comments with the given parent id` });
+
+    const commentsAuthorsIds = [];
+    for (const comment of getAllChildComments) {
+      commentsAuthorsIds.push(comment.authorId);
+    }
     const getAuthorInfor = await userData
       .find(
         { connectionId: { $in: commentsAuthorsIds } },
@@ -483,13 +482,11 @@ feedsIntaraction.post("/post/sub/comments/:id", async (req, res) => {
         }
       }
     }
-    res
-      .status(200)
-      .json({
-        ok: true,
-        message: "successful",
-        subComments: orderedCommentsWithAutors,
-      });
+    res.status(200).json({
+      ok: true,
+      message: "successful",
+      subComments: orderedCommentsWithAutors,
+    });
   } catch (error) {
     res.status(500).json({ ok: false, message: `server error: ${error}` });
   }
