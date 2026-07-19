@@ -76,6 +76,13 @@ io.on("connection", async (socket) => {
     socket.on("leave-room", (room) => {
       socket.leave(room);
     });
+    socket.on("isOnline", (room, senderRoom) => {
+      socket.to(room).emit("areYouOnline", senderRoom);
+    });
+    socket.on("amOnline", (room, state) => {
+      socket.to(room).emit("online", state);
+    });
+
     socket.on("send-message", (messages, room) => {
       const connectionId = messages.from;
       const contactId = messages.to;
