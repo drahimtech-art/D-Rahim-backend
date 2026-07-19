@@ -91,6 +91,14 @@ connectionsRouter.post(
           ok: false,
           message: "invalide requst body one or more fields is missing",
         });
+      const isConnectionToAddIsUserSelf = await userData
+        .find({ _id: userId, connectionId: contactId })
+        .lean();
+      if (isConnectionToAddIsUserSelf.length !== 0)
+        return res.status(403).json({
+          ok: false,
+          message: "you can't add yourself as a connection",
+        });
       const doesConnectionExist = await userConnections
         .find({
           userId: userId,

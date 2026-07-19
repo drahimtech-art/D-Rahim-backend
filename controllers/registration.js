@@ -139,14 +139,6 @@ registrationRouter.post(
         },
       });
       const saveUserLeaingData = await creatUserFeedsLearingData.save();
-      const createFriendRequstStorage = new connectionsRequst({
-        userId: addUser._id,
-        connectionId: addUser.connectionId,
-        requst: [],
-        createdAt: new Date(),
-      });
-      const saveCreatedFriendRequstStorage =
-        await createFriendRequstStorage.save();
       res.status(201).json({ ok: true, message: "succesfull" });
     } catch (error) {
       res.status(200).json({ ok: false, message: `server error: ${error} ` });
