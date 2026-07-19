@@ -38,6 +38,7 @@ const commentsSchema = new Schema({
 });
 commentsSchema.index({ postId: 1, depth: 1, likesCount: 1, createdAt: -1 }); //query for top comments
 commentsSchema.index({ postId: 1, createdAt: -1 }); // most recent query
+commentsSchema.index({ postId: 1, parentId: 1 }); // query for sub comments
 
 const postComments = mongoose.model("postComments", commentsSchema);
 module.exports = postComments;

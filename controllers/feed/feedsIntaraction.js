@@ -364,6 +364,16 @@ feedsIntaraction.put(
         commentToReplyId,
         { $inc: { replyCount: +1 } },
       );
+      //update post comment count
+      const updatePost = await feedsPost.findOneAndUpdate(
+        { postId: postId },
+        { $inc: { "engament.comments": +1 } },
+      );
+      if (!updatePost)
+        return res.status(500).json({
+          ok: false,
+          message: `server error somthing went wrong while trying to update post comment count ${updatePost}`,
+        });
       //end of authors and response logic
       res.status(200).json({
         ok: true,
@@ -411,4 +421,77 @@ feedsIntaraction.put(
     }
   },
 );
+feedsIntaraction.post("/post/sub/comments/:id", async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const commentsParentId = req.body.commentsParentId;
+    const commentsAuthorsIds = req.body.commentsAuthorsIds;
+    if (
+      !postId ||
+      !commentsAuthorsIds ||
+      commentsAuthorsIds.length === 0 ||
+      !commentsParentId
+    )
+      return res.status(400).json({
+        ok: false,
+        message: `invalid requst body one or more fileds not meat`,
+      });
+    const getPost = await feedsPost.find({ postId: postId }).lean();
+    if (getPost.length === 0)
+      return res
+        .status(404)
+        .json({ ok: false, message: `no post with the given id found` });
+    const getAllChildComments = await postComments
+      .find({ postId: postId, parentId: commentsParentId })
+      .lean();
+    if (getAllChildComments.length === 0)
+      return res
+        .status(404)
+        .json({ ok: false, message: `no comments with the given parent id` });
+    const getAuthorInfor = await userData
+      .find(
+        { connectionId: { $in: commentsAuthorsIds } },
+        {
+          firstName: 1,
+          lastName: 1,
+          bio: 1,
+          imageUrl: 1,
+          connectionId: 1,
+          _id: 0,
+        },
+      )
+      .lean();
+
+    if (getAuthorInfor.length === 0)
+      return res
+        .status(404)
+        .json({ ok: false, message: "no authors of comments found" });
+    const orderedCommentsWithAutors = [];
+    for (let c = 0; c < getAllChildComments.length; c++) {
+      const comment = getAllChildComments[c];
+      for (let a = 0; a < getAuthorInfor.length; a++) {
+        const author = getAuthorInfor[a];
+        if (author.connectionId === comment.authorId) {
+          const authorWithOutConnectionId = {
+            firstName: author.firstName,
+            lastName: author.lastName,
+            imageUrl: author.imageUrl,
+          };
+          const formatedComments = { ...authorWithOutConnectionId, ...comment };
+          orderedCommentsWithAutors.push(formatedComments);
+          break;
+        }
+      }
+    }
+    res
+      .status(200)
+      .json({
+        ok: true,
+        message: "successful",
+        subComments: orderedCommentsWithAutors,
+      });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: `server error: ${error}` });
+  }
+});
 module.exports = feedsIntaraction;
