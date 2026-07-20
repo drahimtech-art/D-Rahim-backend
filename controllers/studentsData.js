@@ -108,8 +108,22 @@ studentsDataRouter.put(
       });
       if (isImage && oldImageUrl) {
         const imagePath = oldImageUrl.split(`http://${req.headers.host}/`)[1];
+        console.log(`image path: ${imagePath}`);
+        const rootDir = process.cwd();
+        const filePath = path.join(rootDir, "storage", imagePath);
+        async function checkFileExists(targetPath) {
+          try {
+            await fsPromise.access(targetPath);
+            return true;
+          } catch (err) {
+            return false;
+          }
+        }
+        const isImageExist = await checkFileExists(filePath);
+        console.log(`is image exist: ${isImageExist}`);
+        if (!isImageExist) return;
         await fsPromise
-          .unlink(`storage/${imagePath}`)
+          .unlink(filePath)
           .then((e) => console.log(`successfuly deleted old image`))
           .catch((err) =>
             console.log(`error while deleting old image: ${err}`),
