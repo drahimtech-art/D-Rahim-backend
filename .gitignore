@@ -1,5 +1,4 @@
 node_modules
-storage
 .env
 API.rest
 database.js
