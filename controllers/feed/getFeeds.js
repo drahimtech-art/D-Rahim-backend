@@ -5,6 +5,7 @@ const feedsPosts = require("../../modules/feeds/post.js");
 const postLikes = require("../../modules/feeds/postLikes.js");
 const postComments = require("../../modules/feeds/postComments.js");
 const userData = require("../../modules/studentUser.js");
+const { randomUUID } = require("crypto");
 //middlewares
 const apiRequstValidation = require("../../middlewares/apiValidation.js");
 const validateUser = require("../../middlewares/userValidation.js");
@@ -392,6 +393,7 @@ mediaFeeds.get(
               const orderedPostData = {
                 ...post,
                 ...engamentStats,
+                listId: `${post.postId}/${randomUUID()}`,
               };
               //if all filters are done push to ordered list to be sent back to client
               orderedFeedsPost.push(orderedPostData);
