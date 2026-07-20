@@ -61,7 +61,7 @@ postFeeds.post(
         content: {
           type: contentType,
           caption: contentCaption,
-          content: `http://localhost:5000/feedsContent/${filename}`,
+          content: `http://${req.headers.host}/feedsContent/${filename}`,
         },
         postId: `${connectionId}$${randomUUID()}`,
         postedAt: postedAt,
@@ -75,13 +75,11 @@ postFeeds.post(
         isPostLiked: false,
         topPostComments: [],
       };
-      res
-        .status(201)
-        .json({
-          ok: true,
-          message: "succesful",
-          post: { ...postData, engamentStats },
-        });
+      res.status(201).json({
+        ok: true,
+        message: "succesful",
+        post: { ...postData, engamentStats },
+      });
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error: ${error}` });
     }
