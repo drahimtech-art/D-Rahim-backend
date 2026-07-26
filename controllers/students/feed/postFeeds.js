@@ -1,12 +1,12 @@
 const express = require("express");
 const postFeeds = express.Router();
-const feedsPosts = require("../../modules/feeds/post.js");
+const feedsPosts = require("../../../modules/feeds/post.js");
 const multer = require("multer");
 const path = require("path");
 const { randomUUID } = require("crypto");
 //middlewares
-const apiRequstValidation = require("../../middlewares/apiValidation.js");
-const userValdation = require("../../middlewares/userValidation.js");
+const apiRequstValidation = require("../../../middlewares/apiValidation.js");
+const userValdation = require("../../../middlewares/userValidation.js");
 //
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

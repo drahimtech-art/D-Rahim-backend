@@ -44,11 +44,11 @@ app.get("/", async (req, res) => {
 const registrationRouter = require("./controllers/registration");
 const loginRouter = require("./controllers/login");
 const paymentRouter = require("./controllers/payment");
-const studentsDataRouter = require("./controllers/studentsData");
-const connectionsRouter = require("./controllers/connectionsAndChat");
-const getFeeds = require("./controllers/feed/getFeeds");
-const postFeeds = require("./controllers/feed/postFeeds");
-const feedsIntaraction = require("./controllers/feed/feedsIntaraction");
+const studentsDataRouter = require("./controllers/students/studentsData");
+const connectionsRouter = require("./controllers/students/connectionsAndChat");
+const getFeeds = require("./controllers/students/feed/getFeeds");
+const postFeeds = require("./controllers/students/feed/postFeeds");
+const feedsIntaraction = require("./controllers/students/feed/feedsIntaraction");
 //use controllers
 app.use("/register/user", registrationRouter);
 app.use("/signin/user", loginRouter);

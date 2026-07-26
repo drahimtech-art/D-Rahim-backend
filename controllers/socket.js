@@ -2,7 +2,7 @@ const { Server } = require("socket.io");
 const userValidation = require("jsonwebtoken");
 const contactMessages = require("../modules/contactMessage");
 const getServer = require("../server");
-const { onlineUsers } = require("./cache/cache");
+const { onlineUsers } = require("./students/cache/cache");
 const serverPort = getServer();
 //contect to socket
 const io = new Server(serverPort, {

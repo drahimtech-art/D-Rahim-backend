@@ -1,16 +1,16 @@
 const express = require("express");
 const connectionsRouter = express.Router();
-const userConnections = require("../modules/userConnections.js");
-const contactMessage = require("../modules/contactMessage.js");
-const userData = require("../modules/studentUser.js");
-const connectionsRequst = require("../modules/connectionsRequst.js");
+const userConnections = require("../../modules/userConnections.js");
+const contactMessage = require("../../modules/contactMessage.js");
+const userData = require("../../modules/studentUser.js");
+const connectionsRequst = require("../../modules/connectionsRequst.js");
 const multer = require("multer");
 const path = require("path");
-const { sendFileEvents } = require("./socket.js");
+const { sendFileEvents } = require("../socket.js");
 const { randomUUID } = require("crypto");
 //middlewares
-const apiRequstValidation = require("../middlewares/apiValidation.js");
-const userValdation = require("../middlewares/userValidation.js");
+const apiRequstValidation = require("../../middlewares/apiValidation.js");
+const userValdation = require("../../middlewares/userValidation.js");
 
 //get contacts/connections
 connectionsRouter.get(

@@ -1,17 +1,17 @@
 const express = require("express");
 const mediaFeeds = express.Router();
-const userLeaingData = require("../../modules/feeds/userLearningData/userLearningData.js");
-const feedsPosts = require("../../modules/feeds/post.js");
-const postLikes = require("../../modules/feeds/postLikes.js");
-const postComments = require("../../modules/feeds/postComments.js");
-const userData = require("../../modules/studentUser.js");
+const userLeaingData = require("../../../modules/feeds/userLearningData/userLearningData.js");
+const feedsPosts = require("../../../modules/feeds/post.js");
+const postLikes = require("../../../modules/feeds/postLikes.js");
+const postComments = require("../../../modules/feeds/postComments.js");
+const userData = require("../../../modules/studentUser.js");
 const { randomUUID } = require("crypto");
 //middlewares
-const apiRequstValidation = require("../../middlewares/apiValidation.js");
-const validateUser = require("../../middlewares/userValidation.js");
+const apiRequstValidation = require("../../../middlewares/apiValidation.js");
+const validateUser = require("../../../middlewares/userValidation.js");
 //decay algorithim and states
 const decayStats = require("./decayAlgorithim.js");
-const userConnections = require("../../modules/userConnections.js");
+const userConnections = require("../../../modules/userConnections.js");
 //get post by user intreast
 async function getPostByUserIntrest(userFeedsData, res) {
   try {

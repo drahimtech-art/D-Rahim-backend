@@ -1,13 +1,13 @@
 const express = require("express");
 const studentsDataRouter = express.Router();
-const userData = require("../modules/studentUser");
-const userConnections = require("../modules/userConnections.js");
+const userData = require("../../modules/studentUser");
+const userConnections = require("../../modules/userConnections.js");
 const multer = require("multer");
 const path = require("path");
 const fsPromise = require("fs").promises;
 //middlewares
-const apiRequstValidation = require("../middlewares/apiValidation");
-const userValidation = require("../middlewares/userValidation");
+const apiRequstValidation = require("../../middlewares/apiValidation");
+const userValidation = require("../../middlewares/userValidation");
 //multer middleware
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

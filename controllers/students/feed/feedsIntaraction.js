@@ -1,14 +1,14 @@
 const express = require("express");
 const feedsIntaraction = express.Router();
-const feedsPost = require("../../modules/feeds/post.js");
-const userLearningData = require("../../modules/feeds/userLearningData/userLearningData.js");
-const userConnections = require("../../modules/userConnections.js");
-const postLikes = require("../../modules/feeds/postLikes.js");
-const postComments = require("../../modules/feeds/postComments.js");
-const userData = require("../../modules/studentUser.js");
+const feedsPost = require("../../../modules/feeds/post.js");
+const userLearningData = require("../../../modules/feeds/userLearningData/userLearningData.js");
+const userConnections = require("../../../modules/userConnections.js");
+const postLikes = require("../../../modules/feeds/postLikes.js");
+const postComments = require("../../../modules/feeds/postComments.js");
+const userData = require("../../../modules/studentUser.js");
 //middlewares
-const apiRequstValidation = require("../../middlewares/apiValidation.js");
-const validateUser = require("../../middlewares/userValidation.js");
+const apiRequstValidation = require("../../../middlewares/apiValidation.js");
+const validateUser = require("../../../middlewares/userValidation.js");
 const {
   userMediaIntaractionsScoreingAlgorithim,
 } = require("./middlewares/userMediaIntaractionsScoreingAlgorithim.js");
