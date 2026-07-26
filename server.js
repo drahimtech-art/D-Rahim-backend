@@ -43,18 +43,20 @@ app.get("/", async (req, res) => {
 //controllers
 const registrationRouter = require("./controllers/registration");
 const loginRouter = require("./controllers/login");
-const paymentRouter = require("./controllers/payment");
+const paymentRouter = require("./controllers/students/payment");
 const studentsDataRouter = require("./controllers/students/studentsData");
 const connectionsRouter = require("./controllers/students/connectionsAndChat");
 const getFeeds = require("./controllers/students/feed/getFeeds");
 const postFeeds = require("./controllers/students/feed/postFeeds");
 const feedsIntaraction = require("./controllers/students/feed/feedsIntaraction");
+const homeRouter = require("./controllers/home/home");
 //use controllers
 app.use("/register/user", registrationRouter);
 app.use("/signin/user", loginRouter);
 //app.use("/payment", paymentRouter);
-app.use("/students/", studentsDataRouter);
+app.use("/students", studentsDataRouter);
 app.use("/connection", connectionsRouter);
 app.use("/feeds/get", getFeeds);
 app.use("/feeds/upload", postFeeds);
 app.use("/feeds/intaraction", feedsIntaraction);
+app.use("/home", homeRouter);
