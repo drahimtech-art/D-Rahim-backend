@@ -1,7 +1,7 @@
 const { Server } = require("socket.io");
 const userValidation = require("jsonwebtoken");
 const contactMessages = require("../modules/contactMessage");
-
+const analyticsData = require("../modules/admin/Analytics");
 const getServer = require("../server");
 const { onlineUsers } = require("./students/cache/cache");
 const serverPort = getServer();
@@ -89,6 +89,13 @@ async function StudentsSocketSection(socket) {
       saveChatToDB(room.chatId, messages);
       socket.to(room.connection).emit("receive-message", messages);
     });
+  } catch (error) {
+    console.log(error);
+  }
+}
+async function AnalyticsSocketSection(socket) {
+  try {
+    StudentsSocketSection(socket);
   } catch (error) {
     console.log(error);
   }
