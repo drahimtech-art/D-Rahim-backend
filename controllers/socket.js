@@ -62,9 +62,8 @@ async function sendFileEvents(messages, room) {
     console.log(error);
   }
 }
-//
-
-io.on("connection", async (socket) => {
+//students socket logic
+async function StudentsSocketSection(socket) {
   try {
     //middleware
     await validateUser(socket);
@@ -89,6 +88,13 @@ io.on("connection", async (socket) => {
       saveChatToDB(room.chatId, messages);
       socket.to(room.connection).emit("receive-message", messages);
     });
+  } catch (error) {
+    console.log(error);
+  }
+}
+io.on("connection", async (socket) => {
+  try {
+    StudentsSocketSection(socket);
   } catch (error) {
     console.log(error);
   }
