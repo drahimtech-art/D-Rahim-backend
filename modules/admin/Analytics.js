@@ -17,8 +17,8 @@ const AnalyticsDataSchema = new Schema({
       mobile: { type: Number, required: true },
       tablet: { type: Number, required: true },
       other: { type: Number, required: true },
-      required: true,
     },
+    required: true,
   },
   platformVisitedFrom: {
     facebook: { type: Boolean, required: true },
@@ -47,5 +47,8 @@ const AnalyticsDataSchema = new Schema({
   },
 });
 AnalyticsDataSchema.index({ dateMonthYearDate: 1 });
-const AnalyticsData = mongoose.model("admin_analyticsData");
+const AnalyticsData = mongoose.model(
+  "admin_analyticsData",
+  AnalyticsDataSchema,
+);
 module.exports = AnalyticsData;
