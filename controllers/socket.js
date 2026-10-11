@@ -97,6 +97,7 @@ async function StudentsSocketSection(socket) {
 
 //validated visited user db
 const validatedVisitedUserDataDb = new Map();
+let isCreatingAnalyticsDbDoc = false;
 //free validatedVisitedUserData resources if in storage for 1 hour
 setInterval(() => {
   const userDataToBeDelated = [];
@@ -139,6 +140,7 @@ async function AnalyticsSocketSection(socket) {
             .find({ dateMonthYearDate: todaysDate })
             .lean();
           if (findThisMonthsAnalyticsData.length === 0) {
+            if (isCreatingAnalyticsDbDoc) return;
             console.log("no month data adding new");
             let pagesViewed = 0;
             userData.pageVisited.homePage && (pagesViewed += 1);
@@ -146,6 +148,7 @@ async function AnalyticsSocketSection(socket) {
             userData.pageVisited.aboutPage && (pagesViewed += 1);
             userData.pageVisited.mentorshipPage && (pagesViewed += 1);
             userData.pageVisited.contactPage && (pagesViewed += 1);
+            isCreatingAnalyticsDbDoc = true; // analytics month doc duplication fix on multiple requst;
             const createThisMonthsAnalyticsData = await analyticsData.insertOne(
               {
                 dateMonthYearDate: todaysDate,
@@ -179,6 +182,7 @@ async function AnalyticsSocketSection(socket) {
               dateVisited: pingCurrentTime,
             });
             if (createThisMonthsAnalyticsData) {
+              isCreatingAnalyticsDbDoc = false;
               console.log("successfully created this month analytics");
             }
           } else {
