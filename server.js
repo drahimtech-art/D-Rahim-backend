@@ -54,6 +54,8 @@ const feedsIntaraction = require("./controllers/students/feed/feedsIntaraction")
 const homeRouter = require("./controllers/home/home");
 //admin
 const adminLogin = require("./controllers/admin/login");
+const adminRouter = require("./controllers/admin/admin");
+const adminApiRequstValidation = require("./middlewares/adminApiRequstValidation");
 //use controllers
 app.use("/register/user", registrationRouter);
 app.use("/signin/user", loginRouter);
@@ -66,3 +68,4 @@ app.use("/feeds/intaraction", feedsIntaraction);
 app.use("/home", homeRouter);
 //admin
 app.use("/admin/access/login", adminLogin);
+app.use("admin/access/api", adminApiRequstValidation, adminRouter);
