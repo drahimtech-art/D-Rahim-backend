@@ -27,8 +27,10 @@ const port = process.env.SERVER_PORT || 5000;
 moongose
   .connect(process.env.DATABASE_URL)
   .then(() => {
+    const createAdminScript = require("./controllers/admin/defaultCreateAdmin");
     console.log("database up and runing");
     server.listen(port, () => {
+      createAdminScript();
       console.log(`server runing on port ${port}`);
     });
   })
