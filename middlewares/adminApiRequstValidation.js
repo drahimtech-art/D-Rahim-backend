@@ -23,6 +23,9 @@ async function adminApiRequstValidation(req, res, next) {
     next();
   } catch (error) {
     console.log(error);
+    return res
+      .status(401)
+      .json({ ok: false, message: "invalid session token pls login" });
   }
 }
 module.exports = adminApiRequstValidation;
