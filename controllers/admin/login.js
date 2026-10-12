@@ -8,15 +8,16 @@ const adminProfileData = require("../../modules/admin/adminProfile");
 const adminSessionTokens = loginRouter.post("/login", async (req, res) => {
   try {
     const body = req.body;
+    console.log(body);
     if (!body)
       return res.status(404).json({
         ok: false,
-        message: "invalid requst body one or two filed missing",
+        message: "invalid requst body one or two filed are missing",
       });
-    if (!body.password || body.email)
+    if (!body.password || !body.email)
       return res.status(404).json({
         ok: false,
-        message: "invalid requst body one or two filed missing",
+        message: "invalid requst body one or two filed are missing",
       });
     const adminData = await adminProfileData.find();
     const password = body.password;
