@@ -37,6 +37,9 @@ const adminSessionTokens = loginRouter.post("/login", async (req, res) => {
     const SESSION_TOKEN_ID = jwt.sign(
       { email: adminData[0].email, _id: adminData[0]._id },
       process.env.ADMIN_TOKEN,
+      {
+        expiresIn: "2h",
+      },
     );
     res.cookie("token", SESSION_TOKEN_ID, {
       httpOnly: true,
