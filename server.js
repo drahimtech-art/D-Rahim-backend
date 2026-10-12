@@ -50,6 +50,8 @@ const getFeeds = require("./controllers/students/feed/getFeeds");
 const postFeeds = require("./controllers/students/feed/postFeeds");
 const feedsIntaraction = require("./controllers/students/feed/feedsIntaraction");
 const homeRouter = require("./controllers/home/home");
+//admin
+const adminLogin = require("./controllers/admin/login");
 //use controllers
 app.use("/register/user", registrationRouter);
 app.use("/signin/user", loginRouter);
@@ -60,3 +62,5 @@ app.use("/feeds/get", getFeeds);
 app.use("/feeds/upload", postFeeds);
 app.use("/feeds/intaraction", feedsIntaraction);
 app.use("/home", homeRouter);
+//admin
+app.use("/admin/access/", adminLogin);
