@@ -65,4 +65,4 @@ app.use("/feeds/upload", postFeeds);
 app.use("/feeds/intaraction", feedsIntaraction);
 app.use("/home", homeRouter);
 //admin
-app.use("/admin/access/", adminLogin);
+app.use("/admin/access/login", adminLogin);

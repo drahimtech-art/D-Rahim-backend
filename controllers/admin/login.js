@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const adminProfileData = require("../../modules/admin/adminProfile");
 //
-const adminSessionTokens = loginRouter.post("/login", async (req, res) => {
+const adminSessionTokens = loginRouter.post("/", async (req, res) => {
   try {
     const body = req.body;
     if (!body)
