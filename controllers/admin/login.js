@@ -8,7 +8,6 @@ const adminProfileData = require("../../modules/admin/adminProfile");
 const adminSessionTokens = loginRouter.post("/login", async (req, res) => {
   try {
     const body = req.body;
-    console.log(body);
     if (!body)
       return res.status(404).json({
         ok: false,
