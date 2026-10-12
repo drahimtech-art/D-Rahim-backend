@@ -68,4 +68,4 @@ app.use("/feeds/intaraction", feedsIntaraction);
 app.use("/home", homeRouter);
 //admin
 app.use("/admin/access/login", adminLogin);
-app.use("admin/access/api", adminApiRequstValidation, adminRouter);
+app.use("/admin/access/api", adminApiRequstValidation, adminRouter);
