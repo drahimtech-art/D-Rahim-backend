@@ -97,37 +97,42 @@ async function StudentsSocketSection(socket) {
 
 //validated visited user db
 const validatedVisitedUserDataDb = new Map();
+const validateVisitedUserBounceId = new Set();
 let isCreatingAnalyticsDbDoc = false;
+let isCreatingAnalyticsBounceDbDoc = false;
 //free validatedVisitedUserData resources if in storage for 1 hour
-setInterval(() => {
-  const userDataToBeDelated = [];
-  validatedVisitedUserDataDb.forEach((data) => {
-    const currentTime = new Date().toISOString();
-    const [cDate, cTime] = currentTime.split("T");
-    const [dDate, dTime] = data.dateVisited.split("T");
-    const userId = data.userId;
-    if (cDate !== dDate) {
-      userDataToBeDelated.push(userId);
-    } else {
-      const currentHour = Number(cTime.split(":")[0]);
-      const dataHour = Number(dTime.split(":")[0]);
-      if (currentHour > dataHour) {
+setInterval(
+  () => {
+    const userDataToBeDelated = [];
+    validatedVisitedUserDataDb.forEach((data) => {
+      const currentTime = new Date().toISOString();
+      const [cDate, cTime] = currentTime.split("T");
+      const [dDate, dTime] = data.dateVisited.split("T");
+      const userId = data.userId;
+      if (cDate !== dDate) {
         userDataToBeDelated.push(userId);
+      } else {
+        const currentHour = Number(cTime.split(":")[0]);
+        const dataHour = Number(dTime.split(":")[0]);
+        if (currentHour > dataHour) {
+          userDataToBeDelated.push(userId);
+        }
       }
-    }
-  });
-  //
-  userDataToBeDelated.forEach((userId) => {
-    validatedVisitedUserDataDb.delete(userId);
-  });
-}, 20000); // 10min
+    });
+    //
+    userDataToBeDelated.forEach((userId) => {
+      validatedVisitedUserDataDb.delete(userId);
+    });
+  },
+  60 * 1000 * 2,
+); // 20min
 //
 
 async function AnalyticsSocketSection(socket) {
   try {
     //
     socket.on("validated-new-user", (userData) => {
-      console.log("ping recived");
+      //console.log("ping recived");
       if (!userData || !userData.userId) return;
       const userId = userData.userId;
       //
@@ -135,13 +140,20 @@ async function AnalyticsSocketSection(socket) {
       //
       async function addDataToAnalytics() {
         try {
+          if (validateVisitedUserBounceId.has(userId)) {
+            /**console.log(
+              "found user in bounce wait list removing user with id of wait list",
+              userId,
+            );**/
+            validateVisitedUserBounceId.delete(userId);
+          }
           const todaysDate = new Date().toDateString();
           const findThisMonthsAnalyticsData = await analyticsData
             .find({ dateMonthYearDate: todaysDate })
             .lean();
           if (findThisMonthsAnalyticsData.length === 0) {
             if (isCreatingAnalyticsDbDoc) return;
-            console.log("no month data adding new");
+            //console.log("no month data adding new");
             let pagesViewed = 0;
             userData.pageVisited.homePage && (pagesViewed += 1);
             userData.pageVisited.servicesPage && (pagesViewed += 1);
@@ -183,7 +195,7 @@ async function AnalyticsSocketSection(socket) {
             });
             if (createThisMonthsAnalyticsData) {
               isCreatingAnalyticsDbDoc = false;
-              console.log("successfully created this month analytics");
+              //console.log("successfully created this month analytics");
             }
           } else {
             const dateMonthYearDate = todaysDate;
@@ -332,6 +344,106 @@ async function AnalyticsSocketSection(socket) {
       }
       //
       addDataToAnalytics();
+    });
+    socket.on("new-visited-user", (userId) => {
+      //console.log(`vist id - ${userId}`);
+      validateVisitedUserBounceId.add(userId);
+      setTimeout(async (id = userId) => {
+        try {
+          if (validateVisitedUserBounceId.has(id)) {
+            //console.log("user with id bounce", id);
+            const todaysDate = new Date().toDateString();
+            const findThisMonthsAnalyticsData = await analyticsData
+              .find({ dateMonthYearDate: todaysDate })
+              .lean();
+            if (findThisMonthsAnalyticsData.length === 0) {
+              if (isCreatingAnalyticsBounceDbDoc) return;
+              isCreatingAnalyticsBounceDbDoc = true;
+              const createThisMonthsAnalyticsData =
+                await analyticsData.insertOne({
+                  dateMonthYearDate: todaysDate,
+                  liveVistors: 0,
+                  newUsers: 0,
+                  pageViewed: pagesViewed,
+                  bouncedBackUsers: 1,
+                  returningUsers: 0,
+                  deviceType: {
+                    desktop: 0,
+                    mobile: 0,
+                    tablet: 0,
+                    other: 0,
+                  },
+                  platformVisitedFrom: {
+                    facebook: 0,
+                    linkedIn: 0,
+                    youtub: 0,
+                    tiktok: 0,
+                    behance: 0,
+                    instagram: 0,
+                    twitter: 0,
+                    google: 0,
+                    pintrest: 0,
+                    other: 0,
+                  },
+                });
+              validateVisitedUserBounceId.delete(id);
+              isCreatingAnalyticsBounceDbDoc = false;
+            } else {
+              const updatedAnalyticsData = {
+                dateMonthYearDate: todaysDate,
+                liveVistors: findThisMonthsAnalyticsData[0].liveVistors,
+                newUsers: findThisMonthsAnalyticsData[0].newUsers,
+                pageViewed: findThisMonthsAnalyticsData[0].pagesViewed,
+                bouncedBackUsers:
+                  findThisMonthsAnalyticsData[0].bouncedBackUsers + 1,
+                returningUsers: findThisMonthsAnalyticsData[0].returningUsers,
+                deviceType: {
+                  desktop: findThisMonthsAnalyticsData[0].deviceType.desktop,
+                  mobile: findThisMonthsAnalyticsData[0].deviceType.mobile,
+                  tablet: findThisMonthsAnalyticsData[0].deviceType.tablet,
+                  other: findThisMonthsAnalyticsData[0].deviceType.other,
+                },
+                platformVisitedFrom: {
+                  facebook:
+                    findThisMonthsAnalyticsData[0].platformVisitedFrom.facebook,
+                  linkedIn:
+                    findThisMonthsAnalyticsData[0].platformVisitedFrom.linkedIn,
+                  youtub:
+                    findThisMonthsAnalyticsData[0].platformVisitedFrom.youtub,
+                  tiktok:
+                    findThisMonthsAnalyticsData[0].platformVisitedFrom.tiktok,
+                  behance:
+                    findThisMonthsAnalyticsData[0].platformVisitedFrom.behance,
+                  instagram:
+                    findThisMonthsAnalyticsData[0].platformVisitedFrom
+                      .instagram,
+                  twitter:
+                    findThisMonthsAnalyticsData[0].platformVisitedFrom.twitter,
+                  google:
+                    findThisMonthsAnalyticsData[0].platformVisitedFrom.google,
+                  pintrest:
+                    findThisMonthsAnalyticsData[0].platformVisitedFrom.pintrest,
+                  other:
+                    findThisMonthsAnalyticsData[0].platformVisitedFrom.other,
+                },
+              };
+              const dataId = findThisMonthsAnalyticsData[0]._id;
+              const updateThisMonthAnalytics =
+                await analyticsData.findByIdAndUpdate(
+                  dataId,
+                  updatedAnalyticsData,
+                );
+              validateVisitedUserBounceId.delete(id);
+            }
+          } else {
+            //console.log("user with id stayed", id);
+          }
+        } catch (error) {
+          console.log(
+            `server error while trying to add bounce back user vist data analytics data :${error}`,
+          );
+        }
+      }, 30000); // 30s
     });
   } catch (error) {
     console.log(error);
