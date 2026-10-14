@@ -1,8 +1,18 @@
 const express = require("express");
 const analyticsData = require("../../modules/admin/Analytics");
 const portfolioProjectData = require("../../modules/admin/portfolioProjects");
+const multer = require("multer");
+const path = require("path");
 const adminRouter = express.Router();
-
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./storage/studentsProfileImages");
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+const uploadMiddleware = multer({ storage: storage });
 adminRouter.get("/requst/validate", async (req, res) => {
   try {
     res.status(200).json({ ok: true, message: "admin successful" });
@@ -143,6 +153,65 @@ adminRouter.post(
     } catch (error) {
       console.log(
         `server error in admin requst get analytics datat section : ${error}`,
+      );
+      res.status(500).json({ ok: false, message: `server error : ${error}` });
+    }
+  },
+);
+adminRouter.post(
+  "/requst/upload/new/portfolio/project",
+  uploadMiddleware.single("projectImage"),
+  async (req, res) => {
+    try {
+      const body = JSON.parse(req.body.body);
+      const file = req.file;
+      if (!body)
+        return res.status(400).json({
+          ok: false,
+          message: "invalid reqs body. required body but got known",
+        });
+      const projectData = body;
+      if (!projectData)
+        return res.status(400).json({
+          ok: false,
+          message:
+            "invalid reqs body. required projectData propaty but got known",
+        });
+      if (!file)
+        return res.status(400).json({
+          ok: false,
+          message:
+            "invalid reqs body. required projectData image but got known",
+        });
+      const imageUrl = `http://${req.headers.host}/studentsProfileImages/${file && file.filename}`;
+      const newProject = await portfolioProjectData.insertOne({
+        pImage: imageUrl,
+        title: projectData.title,
+        about: projectData.about,
+        heading: projectData.heading,
+        sImage: imageUrl,
+        capabilities: projectData.capabilities,
+        duration: projectData.duration,
+        team: projectData.time,
+        location: projectData.location,
+        industry: projectData.industry,
+        projectType: projectData.projectType,
+        creationDate: new Date(),
+        projectStatus: "Active",
+      });
+      if (!newProject)
+        return res.status(500).json({
+          ok: false,
+          message: "failed create new portfolio project data",
+        });
+      res.status(200).json({
+        ok: true,
+        message: "succesfully created new portfolio project data",
+        projectData: newProject,
+      });
+    } catch (error) {
+      console.log(
+        `server error in admin requst upload new portfolio project section : ${error}`,
       );
       res.status(500).json({ ok: false, message: `server error : ${error}` });
     }
