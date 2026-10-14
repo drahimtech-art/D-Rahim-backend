@@ -192,7 +192,7 @@ adminRouter.post(
         sImage: imageUrl,
         capabilities: projectData.capabilities,
         duration: projectData.duration,
-        team: projectData.time,
+        team: projectData.team,
         location: projectData.location,
         industry: projectData.industry,
         projectType: projectData.projectType,
