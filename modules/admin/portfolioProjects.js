@@ -17,10 +17,13 @@ const PortfolioProjectSchema = new Schema({
   createdAt: { type: Date, required: true, default: Date.now },
 });
 
-PortfolioProjectSchema.index({ title: 1 });
-PortfolioProjectSchema.index({ projectType: 1 });
+PortfolioProjectSchema.index({
+  title: "text",
+  projectType: "text",
+  projectStatus: "text",
+  creationDate: "text",
+});
 PortfolioProjectSchema.index({ projectStatus: 1 });
-PortfolioProjectSchema.index({ creationDate: 1 });
 
 const portfolioProjectData = mongoose.model(
   "admin_portfolioProject",
