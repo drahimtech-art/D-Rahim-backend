@@ -1,5 +1,6 @@
 const express = require("express");
 const analyticsData = require("../../modules/admin/Analytics");
+const portfolioProjectData = require("../../modules/admin/portfolioProjects");
 const adminRouter = express.Router();
 
 adminRouter.get("/requst/validate", async (req, res) => {
@@ -10,7 +11,6 @@ adminRouter.get("/requst/validate", async (req, res) => {
     res.status(500).json({ ok: false, message: `server error : ${error}` });
   }
 });
-
 adminRouter.post("/requst/get/analytics/website/data", async (req, res) => {
   try {
     const body = req.body;
@@ -103,4 +103,32 @@ adminRouter.post("/requst/get/analytics/website/data", async (req, res) => {
     res.status(500).json({ ok: false, message: `server error : ${error}` });
   }
 });
+adminRouter.post(
+  "/requst/search/filter/proftfolio/data/list",
+  async (req, res) => {
+    try {
+      const body = req.body;
+      if (!body)
+        return res.status(400).json({
+          ok: false,
+          message: "invalid reqs body one. required body but got known",
+        });
+      const searchFilterKeyWords = body.searchWordsList;
+      const findData = await portfolioProjectData
+        .find({ $text: { $search: searchFilterKeyWords } })
+        .sort({ createdAt: -1 })
+        .lean();
+      console.log(findData);
+      res.status(200).json({
+        ok: true,
+        message: "succesfully got back portfolio data",
+      });
+    } catch (error) {
+      console.log(
+        `server error in admin requst get analytics datat section : ${error}`,
+      );
+      res.status(500).json({ ok: false, message: `server error : ${error}` });
+    }
+  },
+);
 module.exports = adminRouter;
