@@ -1,18 +1,22 @@
 const express = require("express");
 const homeRouter = express.Router();
+const portfolioProjectData = require("../../modules/admin/portfolioProjects");
 //devmode
-const projectsList = () => {
-  const workType = {
-    moblieDesign: [
+const createStaticPortfolioProject = async () => {
+  try {
+    const doesDataExist = await portfolioProjectData.find().lean().limit(10);
+    if (doesDataExist.length !== 0)
+      return console.log("data exist skipping work flow");
+
+    const projectsList = [
       {
-        image: "http://localhost:5000/ourworkImage/p1.png",
-        text: "Wankard Moblie App 🇳🇬",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/p1.png",
+        title: "Wankard Moblie App 🇳🇬",
+        about:
           "Wankard is a fintech app focused on creating a clean, accessible, and efficient platform for day to day transactions.",
-        popUpHeadding:
+        heading:
           "Creating seamless, secure, and accessible financial solutions for everyday transactions.",
-        popHeadText: "Wankard",
-        popImageUrl: "http://localhost:5000/ourworkImage/p1.png",
+        sImage: "http://localhost:5000/ourworkImage/p1.png",
         capabilities: [
           "UI/UX Design",
           "Mobile App Design",
@@ -23,18 +27,19 @@ const projectsList = () => {
         team: ["Product Designer", "UI Designer", "UX Researcher", "Developer"],
         location: "Nigeria",
         industry: ["Fintech Digital Payments"],
-        endText:
-          "wankard is a fintech app focused on creating a clean, accessible, and efficient platform for day to day transactions",
+        creationDate: new Date(),
+        projectType: "moblieDesign",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/3.png",
-        text: "Snap Moblie App",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/3.png",
+        title: "Snap Moblie App",
+        about:
           "This case study showcases our end-to-end UX design process from research and wireframing to prototyping and final UI design.",
-        popUpHeadding:
+        heading:
           "Creating faster, smarter, and more connected mobile experiences for everyday communication.",
-        popHeadText: "Snap Moblie",
-        popImageUrl: "http://localhost:5000/ourworkImage/p3.png",
+
+        sImage: "http://localhost:5000/ourworkImage/p3.png",
         capabilities: [
           "UI/UX Design",
           "Mobile App Design",
@@ -45,18 +50,20 @@ const projectsList = () => {
         team: ["Product Designer", "UI Designer", "UX Researcher", "Developer"],
         location: "Nigeria",
         industry: ["Mobile Technology", "Communication"],
-        endText:
-          "Snap Mobile case study showcases our end-to-end UX design process from research and wireframing to prototyping and final UI design.",
+        projectType: "branding",
+        creationDate: new Date(),
+        projectType: "moblieDesign",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/2.png",
-        text: "Jobified Moblie App 🇳🇬",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/2.png",
+        title: "Jobified Moblie App 🇳🇬",
+        about:
           "Creating a job-matching platform designed to bridge the gap between job seekers and employers through a smooth, user-centered experience.",
-        popUpHeadding:
+        heading:
           "Creating smarter pathways to career growth, opportunity, and seamless job connections.",
-        popHeadText: "Jobified Employer",
-        popImageUrl: "http://localhost:5000/ourworkImage/p2.png",
+
+        sImage: "http://localhost:5000/ourworkImage/p2.png",
         capabilities: [
           "UI/UX Design",
           "Mobile App Design",
@@ -67,18 +74,20 @@ const projectsList = () => {
         team: ["Product Designer", "UI Designer", "UX Researcher", "Developer"],
         location: "Nigeria",
         industry: ["Recruitment Career Technology"],
-        endText:
-          "Creating a job-matching platform designed to bridge the gap between job seekers and employers through a smooth, user-centered experience.",
+        eprojectType: "branding",
+        creationDate: new Date(),
+        projectType: "moblieDesign",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/12.png",
-        text: "Health PocketMoblie App 🇳🇬",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/12.png",
+        title: "Health PocketMoblie App 🇳🇬",
+        about:
           "Health in Pocket is a mobile health companion designed to put essential healthcare services directly in the hands of users.",
-        popUpHeadding:
+        heading:
           "Creating faster, smarter, and more meaningful communication experiences for everyday conversations.",
-        popHeadText: "Target Message",
-        popImageUrl: "http://localhost:5000/ourworkImage/p12.png",
+
+        sImage: "http://localhost:5000/ourworkImage/p12.png",
         capabilities: [
           "UI/UX Design",
           "Messaging Experience Design",
@@ -89,18 +98,19 @@ const projectsList = () => {
         team: ["Product Designer", "UI Designer", "Developer"],
         location: "Nigeria",
         industry: ["Communication Technology", "Social Networking"],
-        endText:
-          "A mobile app designed to put essential end-to-end encrypted messaging in the hands of users",
+        creationDate: new Date(),
+        projectType: "moblieDesign",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/5.png",
-        text: "Travel Express Moblie App",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/5.png",
+        title: "Travel Express Moblie App",
+        about:
           "Travel express is a travel experience platform designed to simplify trip planning and enhance the way users explore new destinations",
-        popUpHeadding:
+        heading:
           "Creating seamless travel experiences through smarter booking, planning, and journey management.",
-        popHeadText: "Travel Express",
-        popImageUrl: "http://localhost:5000/ourworkImage/p5.png",
+
+        sImage: "http://localhost:5000/ourworkImage/p5.png",
         capabilities: [
           "UI/UX Design",
           "Mobile App Design",
@@ -111,18 +121,19 @@ const projectsList = () => {
         team: ["Product Designer", "UI Designer", "UX Researcher", "Developer"],
         location: "Nigeria",
         industry: ["Travel Technology", "Transportation"],
-        endText:
-          "Travel express is a travel experience platform designed to simplify trip planning and enhance the way users explore new destinations",
+        projectType: "branding",
+        creationDate: new Date(),
+        projectType: "moblieDesign",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/11.png",
-        text: "Mobile Design ",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/11.png",
+        title: "Mobile Design ",
+        about:
           "VitaCare is a digital healthcare platform designed to simplify access to medical services and help users to manage their health anytime.",
-        popUpHeadding:
+        heading:
           "Creating accessible healthcare solutions that connect people to better care and wellness.",
-        popHeadText: "Vite-Care",
-        popImageUrl: "http://localhost:5000/ourworkImage/p11.png",
+        sImage: "http://localhost:5000/ourworkImage/p11.png",
         capabilities: [
           "UI/UX Design",
           "Healthcare Experience",
@@ -138,20 +149,20 @@ const projectsList = () => {
         ],
         location: "Nigeria",
         industry: ["HealthTech", "Healthcare"],
-        endText:
-          "VitaCare is a digital healthcare platform designed to simplify access to medical services and help users to manage their health anytime.",
+        projectType: "branding",
+        creationDate: new Date(),
+        projectType: "moblieDesign",
+        projectStatus: "Active",
       },
-    ],
-    websiteDesign: [
+
       {
-        image: "http://localhost:5000/ourworkImage/p9.png",
-        text: "Xnora Web App 🇳🇬",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/p9.png",
+        title: "Xnora Web App 🇳🇬",
+        about:
           "Xnora is a modern web platform built for seamless deployment and efficient performance. It provides a clean, environment for deployment",
-        popUpHeadding:
+        heading:
           "Empowering businesses to deploy, manage, and scale digital products with speed and efficiency.",
-        popHeadText: "Xnora",
-        popImageUrl: "http://localhost:5000/ourworkImage/p9.png",
+        sImage: "http://localhost:5000/ourworkImage/p9.png",
         capabilities: [
           "UI/UX Design",
           "Web Platform Design",
@@ -167,18 +178,19 @@ const projectsList = () => {
         ],
         location: "Nigeria",
         industry: ["Cloud Technology", "Software Development"],
-        endText:
-          "Xnora is a modern web platform built for seamless deployment and efficient performance. It provides a clean, enviroment for deployment.",
+        creationDate: new Date(),
+        projectType: "websiteDesign",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/4.png",
-        text: "Finance All Website 🇦🇺🇺🇸",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/4.png",
+        title: "Finance All Website 🇦🇺🇺🇸",
+        about:
           "A financial dashboard designed to provide a clear, real-time overview of personal and business finances. It delivers insights and analytics. ",
-        popUpHeadding:
+        heading:
           "Creating smarter financial insights, seamless tracking, and better money management for everyone.",
-        popHeadText: "Finance All",
-        popImageUrl: "http://localhost:5000/ourworkImage/p4.png",
+
+        sImage: "http://localhost:5000/ourworkImage/p4.png",
         capabilities: [
           "UI/UX Designer",
           "Finacial Dashboard Design",
@@ -189,18 +201,19 @@ const projectsList = () => {
         team: ["Product Designer", "UI Designer", "UX Researcher", "Developer"],
         location: "Nigeria",
         industry: ["Fintech", "Financial Analytics"],
-        endText:
-          "A financial dashboard designed to provide a clear, real-time overview of personal and business finaces. it delivers insights and analytics.",
+        creationDate: new Date(),
+        projectType: "websiteDesign",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/10.png",
-        text: "Pdf to word web app 🇳🇬",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/10.png",
+        title: "Pdf to word web app 🇳🇬",
+        about:
           "PDF to Word is a simple and efficient tool for converting PDF files into fully editable Word documents while preserving layout and formatting.",
-        popUpHeadding:
+        heading:
           "Simplifying document conversion through speed, accuracy, and seamless accessibility.",
-        popHeadText: "Pdf to word",
-        popImageUrl: "http://localhost:5000/ourworkImage/p10.png",
+
+        sImage: "http://localhost:5000/ourworkImage/p10.png",
         capabilities: [
           "UI/UX Design",
           "Document Conversion Flow",
@@ -211,18 +224,19 @@ const projectsList = () => {
         team: ["Product Designer", "UI Designer", "Developer"],
         location: "Nigeria",
         industry: ["Productivity Tools", "Document Technology"],
-        endText:
-          "PDF to Word is a simple and efficient tool for converting PDF files into fully editable Word documents while preserving layout and formatting",
+        creationDate: new Date(),
+        projectType: "websiteDesign",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/0.png",
-        text: "Alhafeez foundation web App 🇳🇬🇬🇫",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/0.png",
+        title: "Alhafeez foundation web App 🇳🇬🇬🇫",
+        about:
           "A non-profit organization dedicated to providing support, resources, and opportunities to underserved communities through sustainable initiatives.",
-        popUpHeadding:
+        heading:
           "Creating pathways of hope, support, and sustainable change for underserved communities.",
-        popHeadText: "Alhafeez Foundation",
-        popImageUrl: "http://localhost:5000/ourworkImage/p0.png",
+
+        sImage: "http://localhost:5000/ourworkImage/p0.png",
         capabilities: [
           "Community Support",
           "Humanitarian Aid",
@@ -232,18 +246,18 @@ const projectsList = () => {
         team: ["Program Coordinator", "Volunteers", "Community Leaders"],
         location: "Nigeria",
         industry: ["Non-profit Organization", "Humanitarian Services"],
-        endText:
-          "Alhafeez foundation is a non-profit organization dedicated to providing support, resources, and opportunities to underserved communities through sustainable initiatives.",
+        creationDate: new Date(),
+        projectType: "websiteDesign",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/14.png",
-        text: "Razor Web App 🇧🇪🇬🇧🏝️",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/14.png",
+        title: "Razor Web App 🇧🇪🇬🇧🏝️",
+        about:
           "A secure authentication system designed to provide fast, seamless, and reliable user access through a clean and intuitive interface.",
-        popUpHeadding:
+        heading:
           "Creating secure and seamless authentication experiences for modern digital platforms.",
-        popHeadText: "Razor",
-        popImageUrl: "http://localhost:5000/ourworkImage/p14.png",
+        sImage: "http://localhost:5000/ourworkImage/p14.png",
         capabilities: [
           "UI/UX Design",
           "Mobile App Design",
@@ -254,18 +268,19 @@ const projectsList = () => {
         team: ["Product Designer", "UI Designer", "UX Researcher", "Developer"],
         location: "Nigeria",
         industry: ["Cybersecurity", "Authentication Technology"],
-        endText:
-          "A secure authentication system designed to provide fast, seamless, and reliable user access through a clean and inteuitve interface",
+        creationDate: new Date(),
+        projectType: "websiteDesign",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/16.png",
-        text: "NYSC Redesign web App ",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/16.png",
+        title: "NYSC Redesign web App ",
+        about:
           "A secure authentication system designed to provide fast, seamless, and reliable user access through a clean and intuitive interface.",
-        popUpHeadding:
+        heading:
           "Transforming youth service operations through seamless digital experiences, accessibility, and efficiency.",
-        popHeadText: "NYSC Redesign web App 🇳🇬",
-        popImageUrl: "http://localhost:5000/ourworkImage/p16.png",
+
+        sImage: "http://localhost:5000/ourworkImage/p16.png",
         capabilities: [
           "UI/UX Design",
           "System Resign",
@@ -276,20 +291,20 @@ const projectsList = () => {
         team: ["Product Designer", "UI Designer", "UX Researcher", "Developer"],
         location: "Nigeria",
         industry: ["Government Technology", "Public Services"],
-        endText:
-          "A user-centered digital project aimed at improving the experience of corps members by simplifing processes, and modernizing the overall platform",
+        creationDate: new Date(),
+        projectType: "websiteDesign",
+        projectStatus: "Active",
       },
-    ],
-    branding: [
+
       {
-        image: "http://localhost:5000/ourworkImage/0.png",
-        text: "Alhafeez foundation web App 🇳🇬🇬🇫",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/0.png",
+        title: "Alhafeez foundation web App 🇳🇬🇬🇫",
+        about:
           "A non-profit organization dedicated to providing support, resources, and opportunities to underserved communities through sustainable initiatives.",
-        popUpHeadding:
+        heading:
           "Creating pathways of hope, support, and sustainable change for underserved communities.",
-        popHeadText: "Alhafeez Foundation",
-        popImageUrl: "http://localhost:5000/ourworkImage/p0.png",
+
+        sImage: "http://localhost:5000/ourworkImage/p0.png",
         capabilities: [
           "Community Support",
           "Humanitarian Aid",
@@ -299,18 +314,19 @@ const projectsList = () => {
         team: ["Program Coordinator", "Volunteers", "Community Leaders"],
         location: "Nigeria",
         industry: ["Non-profit Organization", "Humanitarian Services"],
-        endText:
-          "Alhafeez foundation is a non-profit organization dedicated to providing support, resources, and opportunities to underserved communities through sustainable initiatives.",
+
+        creationDate: new Date(),
+        projectType: "branding",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/14.png",
-        text: "Razor Web App 🇧🇪🇬🇧🏝️",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/14.png",
+        title: "Razor Web App 🇧🇪🇬🇧🏝️",
+        about:
           "A secure authentication system designed to provide fast, seamless, and reliable user access through a clean and intuitive interface.",
-        popUpHeadding:
+        heading:
           "Creating secure and seamless authentication experiences for modern digital platforms.",
-        popHeadText: "",
-        popImageUrl: "http://localhost:5000/ourworkImage/p14.png",
+        sImage: "http://localhost:5000/ourworkImage/p14.png",
         capabilities: [
           "UI/UX Design",
           "Mobile App Design",
@@ -321,18 +337,18 @@ const projectsList = () => {
         team: ["Product Designer", "UI Designer", "UX Researcher", "Developer"],
         location: "Nigeria",
         industry: ["Cybersecurity", "Authentication Technology"],
-        endText:
-          "A secure authentication system designed to provide fast, seamless, and reliable user access through a clean and inteuitve interface",
+        creationDate: new Date(),
+        projectType: "branding",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/6.png",
-        text: "Face Scan Mobile App 🇬🇫",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/6.png",
+        title: "Face Scan Mobile App 🇬🇫",
+        about:
           " a biometric authentication system that enables secure and seamless user verification using facial recognition technology.",
-        popUpHeadding:
+        heading:
           "Creating secure identity verification through fast, seamless, and intelligent facial recognition.",
-        popHeadText: "Face Scan",
-        popImageUrl: "http://localhost:5000/ourworkImage/p6.png",
+        sImage: "http://localhost:5000/ourworkImage/p6.png",
         capabilities: [
           "UI/UX Design",
           "Biometric Authentication",
@@ -343,18 +359,18 @@ const projectsList = () => {
         team: ["Product Designer", "UI Designer", "Developer"],
         location: "Nigeria",
         industry: ["Security Technology", "Biometic Solutions"],
-        endText:
-          "a biometric authentication system that enables secure and seamless user verification using facial recognition technology",
+        creationDate: new Date(),
+        projectType: "branding",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/17.png",
-        text: "Home Architect web App🇳🇬",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/17.png",
+        title: "Home Architect web App🇳🇬",
+        about:
           "A design platform that helps users plan, visualize, and create functional home layouts through an intuitive and user-friendly interface.",
-        popUpHeadding:
+        heading:
           "Transforming ideas into functional living spaces through smart design and visualization.",
-        popHeadText: "Home Architect",
-        popImageUrl: "http://localhost:5000/ourworkImage/p17.png",
+        sImage: "http://localhost:5000/ourworkImage/p17.png",
         capabilities: [
           "UI/UX Design",
           "Architecture Planning",
@@ -370,18 +386,19 @@ const projectsList = () => {
         ],
         location: "Nigeria",
         industry: ["Architecture", "Real Estate Tecnology"],
-        endText:
-          "A design platform that helps users plan, visualize, and create functional home layouts through an intuitive and user-friendly interface.",
+        creationDate: new Date(),
+        projectType: "branding",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/4.png",
-        text: "Finance All Website 🇦🇺🇺🇸🇺",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/4.png",
+        title: "Finance All Website 🇦🇺🇺🇸🇺",
+        about:
           "A financial dashboard designed to provide a clear, real-time overview of personal and business finances. It delivers insights and analytics. ",
-        popUpHeadding:
+        heading:
           "Creating smarter financial insights, seamless tracking, and better money management for everyone.",
-        popHeadText: "Finance All",
-        popImageUrl: "http://localhost:5000/ourworkImage/p4.png",
+
+        sImage: "http://localhost:5000/ourworkImage/p4.png",
         capabilities: [
           "UI/UX Designer",
           "Finacial Dashboard Design",
@@ -392,18 +409,20 @@ const projectsList = () => {
         team: ["Product Designer", "UI Designer", "UX Researcher", "Developer"],
         location: "Nigeria",
         industry: ["Fintech", "Financial Analytics"],
-        endText:
-          "A financial dashboard designed to provide a clear, real-time overview of personal and business finaces. it delivers insights and analytics.",
+
+        creationDate: new Date(),
+        projectType: "branding",
+        projectStatus: "Active",
       },
       {
-        image: "http://localhost:5000/ourworkImage/10.png",
-        text: "Pdf To Word Web App 🇳🇬",
-        subText:
+        pImage: "http://localhost:5000/ourworkImage/10.png",
+        title: "Pdf To Word Web App 🇳🇬",
+        about:
           "PDF to Word is a simple and efficient tool for converting PDF files into fully editable Word documents while preserving layout and formatting.",
-        popUpHeadding:
+        heading:
           "Simplifying document conversion through speed, accuracy, and seamless accessibility.",
-        popHeadText: "Pdf to word",
-        popImageUrl: "http://localhost:5000/ourworkImage/p10.png",
+
+        sImage: "http://localhost:5000/ourworkImage/p10.png",
         capabilities: [
           "UI/UX Design",
           "Document Conversion Flow",
@@ -414,13 +433,22 @@ const projectsList = () => {
         team: ["Product Designer", "UI Designer", "Developer"],
         location: "Nigeria",
         industry: ["Productivity Tools", "Document Technology"],
-        endText:
-          "PDF to Word is a simple and efficient tool for converting PDF files into fully editable Word documents while preserving layout and formatting",
+        creationDate: new Date(),
+        projectType: "branding",
+        projectStatus: "Active",
       },
-    ],
-  };
-  return workType;
+    ];
+    const sendCreateDataRequst =
+      await portfolioProjectData.insertMany(projectsList);
+    console.log(sendCreateDataRequst);
+  } catch (error) {
+    console.log(
+      "Got Error while trying to create static portfolio project :",
+      error,
+    );
+  }
 };
+createStaticPortfolioProject();
 //
 //middleware
 const validateclient = async (req, res, next) => {
@@ -438,8 +466,32 @@ const validateclient = async (req, res, next) => {
 };
 homeRouter.get("/ourwork/projectlist", validateclient, async (req, res) => {
   try {
-    const data = projectsList();
-    res.status(200).json({ ok: true, message: "succesful", list: data });
+    const getPortfolioProjectList = await portfolioProjectData.find();
+    const portfolioCaltigoryProjectList = {
+      moblieDesign: [],
+      websiteDesign: [],
+      branding: [],
+    };
+    for (let i = 0; i < getPortfolioProjectList.length; i++) {
+      if (getPortfolioProjectList[i].projectType === "moblieDesign") {
+        portfolioCaltigoryProjectList.moblieDesign.push(
+          getPortfolioProjectList[i],
+        );
+      } else if (getPortfolioProjectList[i].projectType === "websiteDesign") {
+        portfolioCaltigoryProjectList.websiteDesign.push(
+          getPortfolioProjectList[i],
+        );
+      } else if (getPortfolioProjectList[i].projectType === "branding") {
+        portfolioCaltigoryProjectList.branding.push(getPortfolioProjectList[i]);
+      }
+    }
+    res
+      .status(200)
+      .json({
+        ok: true,
+        message: "succesful",
+        list: portfolioCaltigoryProjectList,
+      });
   } catch (error) {
     res.status(500).json({ ok: false, message: `server error: ${error}` });
     console.log(`server error: ${error}`);
