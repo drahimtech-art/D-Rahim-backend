@@ -104,7 +104,7 @@ adminRouter.post("/requst/get/analytics/website/data", async (req, res) => {
   }
 });
 adminRouter.post(
-  "/requst/search/filter/proftfolio/data/list",
+  "/requst/search/filter/get/proftfolio/data/list",
   async (req, res) => {
     try {
       const body = req.body;
@@ -114,14 +114,31 @@ adminRouter.post(
           message: "invalid reqs body one. required body but got known",
         });
       const searchFilterKeyWords = body.searchWordsList;
-      const findData = await portfolioProjectData
-        .find({ $text: { $search: searchFilterKeyWords } })
-        .sort({ createdAt: -1 })
-        .lean();
-      console.log(findData);
+      const filterStatus = body.filterStatus;
+      const isStatusSearch = body.isStatusSearch;
+      const queryFilter = [];
+      if (!isStatusSearch) {
+        const findData = await portfolioProjectData
+          .find({ $text: { $search: searchFilterKeyWords } })
+          .sort({ createdAt: -1 })
+          .lean();
+        findData.forEach((value) => {
+          queryFilter.push(value);
+        });
+        console.log(findData);
+      } else {
+        const findData = await portfolioProjectData
+          .find({ projectStatus: { $in: [filterStatus] } })
+          .sort({ createdAt: -1 })
+          .lean();
+        findData.forEach((value) => {
+          queryFilter.push(value);
+        });
+      }
       res.status(200).json({
         ok: true,
         message: "succesfully got back portfolio data",
+        data: queryFilter,
       });
     } catch (error) {
       console.log(
