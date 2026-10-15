@@ -125,29 +125,46 @@ adminRouter.post(
         });
       const searchFilterKeyWords = body.searchWordsList;
       const filterStatus = body.filterStatus;
-      const isStatusSearch = body.isStatusSearch;
       const queryFilter = [];
-      if (!isStatusSearch) {
+      if (searchFilterKeyWords.trim() !== "") {
         const findData = await portfolioProjectData
           .find({ $text: { $search: searchFilterKeyWords } })
           .sort({ createdAt: -1 })
           .lean();
         findData.forEach((value) => {
-          queryFilter.push(value);
+          if (filterStatus.trim() === "All") {
+            queryFilter.push(value);
+          } else {
+            if (value.projectStatus === filterStatus.trim()) {
+              queryFilter.push(value);
+            }
+          }
         });
-        console.log(findData);
       } else {
-        const findData = await portfolioProjectData
-          .find({ projectStatus: { $in: [filterStatus] } })
-          .sort({ createdAt: -1 })
-          .lean();
-        findData.forEach((value) => {
-          queryFilter.push(value);
-        });
+        if (filterStatus.trim() === "All") {
+          const findData = await portfolioProjectData
+            .find()
+            .sort({ createdAt: -1 })
+            .lean();
+          findData.forEach((value) => {
+            queryFilter.push(value);
+          });
+        } else {
+          const findData = await portfolioProjectData
+            .find({ projectStatus: filterStatus })
+            .sort({ createdAt: -1 })
+            .lean();
+          findData.forEach((value) => {
+            queryFilter.push(value);
+          });
+        }
       }
       res.status(200).json({
         ok: true,
-        message: "succesfully got back portfolio data",
+        message:
+          queryFilter.length > 0
+            ? "succesfully got back portfolio data"
+            : "No records match filter query",
         data: queryFilter,
       });
     } catch (error) {
