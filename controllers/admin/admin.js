@@ -105,6 +105,7 @@ adminRouter.post("/requst/get/analytics/website/data", async (req, res) => {
       ok: true,
       message: "succesfully got back analytics data",
       data: joinAnalyticsData,
+      graphData: totalAnalyticsDataScore,
     });
   } catch (error) {
     console.log(
@@ -112,7 +113,6 @@ adminRouter.post("/requst/get/analytics/website/data", async (req, res) => {
     );
     res.status(500).json({ ok: false, message: `server error : ${error}` });
   }
-  console.log(filterStatus);
 });
 adminRouter.post(
   "/requst/search/filter/get/portfolio/data/list",
