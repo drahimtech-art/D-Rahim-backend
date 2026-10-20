@@ -1,6 +1,7 @@
 const express = require("express");
 const analyticsData = require("../../modules/admin/Analytics");
 const portfolioProjectData = require("../../modules/admin/portfolioProjects");
+const adminProfileData = require("../../modules/admin/adminProfile");
 const multer = require("multer");
 const path = require("path");
 const adminRouter = express.Router();
@@ -241,6 +242,38 @@ adminRouter.get("/requst/logout", async (req, res) => {
     res.status(200).json({ ok: true, message: "logout successful" });
   } catch (error) {
     console.log(`server error in admin logout section : ${error}`);
+    res.status(500).json({ ok: false, message: `server error : ${error}` });
+  }
+});
+adminRouter.get("/requst/admin/profile/data", async (req, res) => {
+  try {
+    const adminId = res.tokenId;
+    const validateAdminExist = await adminProfileData
+      .find({ _id: adminId })
+      .lean();
+    if (validateAdminExist.length === 0)
+      return res
+        .status(404)
+        .json({
+          ok: false,
+          message: "faild to get admin info as no admin records was found",
+        });
+    const adminInfo = {
+      image: validateAdminExist[0].image,
+      name: validateAdminExist[0].name,
+      about: validateAdminExist[0].about,
+      email: validateAdminExist[0].email,
+      __v: validateAdminExist[0].__v,
+    };
+    res
+      .status(200)
+      .json({
+        ok: true,
+        message: "successfully got admin data",
+        data: adminInfo,
+      });
+  } catch (error) {
+    console.log(`server error in get admin profile data section : ${error}`);
     res.status(500).json({ ok: false, message: `server error : ${error}` });
   }
 });
