@@ -28,7 +28,7 @@ const createStaticPortfolioProject = async () => {
         location: "Nigeria",
         industry: ["Fintech Digital Payments"],
         creationDate: new Date(),
-        projectType: "moblieDesign",
+        projectType: "Moblie Design",
         projectStatus: "Active",
       },
       {
@@ -50,9 +50,9 @@ const createStaticPortfolioProject = async () => {
         team: ["Product Designer", "UI Designer", "UX Researcher", "Developer"],
         location: "Nigeria",
         industry: ["Mobile Technology", "Communication"],
-        projectType: "branding",
+        projectType: "Branding",
         creationDate: new Date(),
-        projectType: "moblieDesign",
+        projectType: "Moblie Design",
         projectStatus: "Active",
       },
       {
@@ -74,9 +74,9 @@ const createStaticPortfolioProject = async () => {
         team: ["Product Designer", "UI Designer", "UX Researcher", "Developer"],
         location: "Nigeria",
         industry: ["Recruitment Career Technology"],
-        eprojectType: "branding",
+        eprojectType: "Branding",
         creationDate: new Date(),
-        projectType: "moblieDesign",
+        projectType: "Moblie Design",
         projectStatus: "Active",
       },
       {
@@ -99,7 +99,7 @@ const createStaticPortfolioProject = async () => {
         location: "Nigeria",
         industry: ["Communication Technology", "Social Networking"],
         creationDate: new Date(),
-        projectType: "moblieDesign",
+        projectType: "Moblie Design",
         projectStatus: "Active",
       },
       {
@@ -121,9 +121,9 @@ const createStaticPortfolioProject = async () => {
         team: ["Product Designer", "UI Designer", "UX Researcher", "Developer"],
         location: "Nigeria",
         industry: ["Travel Technology", "Transportation"],
-        projectType: "branding",
+        projectType: "Branding",
         creationDate: new Date(),
-        projectType: "moblieDesign",
+        projectType: "Moblie Design",
         projectStatus: "Active",
       },
       {
@@ -149,9 +149,9 @@ const createStaticPortfolioProject = async () => {
         ],
         location: "Nigeria",
         industry: ["HealthTech", "Healthcare"],
-        projectType: "branding",
+        projectType: "Branding",
         creationDate: new Date(),
-        projectType: "moblieDesign",
+        projectType: "Moblie Design",
         projectStatus: "Active",
       },
 
@@ -179,7 +179,7 @@ const createStaticPortfolioProject = async () => {
         location: "Nigeria",
         industry: ["Cloud Technology", "Software Development"],
         creationDate: new Date(),
-        projectType: "websiteDesign",
+        projectType: "Website Design",
         projectStatus: "Active",
       },
       {
@@ -202,7 +202,7 @@ const createStaticPortfolioProject = async () => {
         location: "Nigeria",
         industry: ["Fintech", "Financial Analytics"],
         creationDate: new Date(),
-        projectType: "websiteDesign",
+        projectType: "Website Design",
         projectStatus: "Active",
       },
       {
@@ -225,7 +225,7 @@ const createStaticPortfolioProject = async () => {
         location: "Nigeria",
         industry: ["Productivity Tools", "Document Technology"],
         creationDate: new Date(),
-        projectType: "websiteDesign",
+        projectType: "Website Design",
         projectStatus: "Active",
       },
       {
@@ -247,7 +247,7 @@ const createStaticPortfolioProject = async () => {
         location: "Nigeria",
         industry: ["Non-profit Organization", "Humanitarian Services"],
         creationDate: new Date(),
-        projectType: "websiteDesign",
+        projectType: "Website Design",
         projectStatus: "Active",
       },
       {
@@ -269,7 +269,7 @@ const createStaticPortfolioProject = async () => {
         location: "Nigeria",
         industry: ["Cybersecurity", "Authentication Technology"],
         creationDate: new Date(),
-        projectType: "websiteDesign",
+        projectType: "Website Design",
         projectStatus: "Active",
       },
       {
@@ -292,7 +292,7 @@ const createStaticPortfolioProject = async () => {
         location: "Nigeria",
         industry: ["Government Technology", "Public Services"],
         creationDate: new Date(),
-        projectType: "websiteDesign",
+        projectType: "Website Design",
         projectStatus: "Active",
       },
 
@@ -316,7 +316,7 @@ const createStaticPortfolioProject = async () => {
         industry: ["Non-profit Organization", "Humanitarian Services"],
 
         creationDate: new Date(),
-        projectType: "branding",
+        projectType: "Branding",
         projectStatus: "Active",
       },
       {
@@ -338,7 +338,7 @@ const createStaticPortfolioProject = async () => {
         location: "Nigeria",
         industry: ["Cybersecurity", "Authentication Technology"],
         creationDate: new Date(),
-        projectType: "branding",
+        projectType: "Branding",
         projectStatus: "Active",
       },
       {
@@ -360,7 +360,7 @@ const createStaticPortfolioProject = async () => {
         location: "Nigeria",
         industry: ["Security Technology", "Biometic Solutions"],
         creationDate: new Date(),
-        projectType: "branding",
+        projectType: "Branding",
         projectStatus: "Active",
       },
       {
@@ -387,7 +387,7 @@ const createStaticPortfolioProject = async () => {
         location: "Nigeria",
         industry: ["Architecture", "Real Estate Tecnology"],
         creationDate: new Date(),
-        projectType: "branding",
+        projectType: "Branding",
         projectStatus: "Active",
       },
       {
@@ -411,7 +411,7 @@ const createStaticPortfolioProject = async () => {
         industry: ["Fintech", "Financial Analytics"],
 
         creationDate: new Date(),
-        projectType: "branding",
+        projectType: "Branding",
         projectStatus: "Active",
       },
       {
@@ -434,7 +434,7 @@ const createStaticPortfolioProject = async () => {
         location: "Nigeria",
         industry: ["Productivity Tools", "Document Technology"],
         creationDate: new Date(),
-        projectType: "branding",
+        projectType: "Branding",
         projectStatus: "Active",
       },
     ];
@@ -473,25 +473,23 @@ homeRouter.get("/ourwork/projectlist", validateclient, async (req, res) => {
       branding: [],
     };
     for (let i = 0; i < getPortfolioProjectList.length; i++) {
-      if (getPortfolioProjectList[i].projectType === "moblieDesign") {
+      if (getPortfolioProjectList[i].projectType === "Moblie Design") {
         portfolioCaltigoryProjectList.moblieDesign.push(
           getPortfolioProjectList[i],
         );
-      } else if (getPortfolioProjectList[i].projectType === "websiteDesign") {
+      } else if (getPortfolioProjectList[i].projectType === "Website Design") {
         portfolioCaltigoryProjectList.websiteDesign.push(
           getPortfolioProjectList[i],
         );
-      } else if (getPortfolioProjectList[i].projectType === "branding") {
+      } else if (getPortfolioProjectList[i].projectType === "Branding") {
         portfolioCaltigoryProjectList.branding.push(getPortfolioProjectList[i]);
       }
     }
-    res
-      .status(200)
-      .json({
-        ok: true,
-        message: "succesful",
-        list: portfolioCaltigoryProjectList,
-      });
+    res.status(200).json({
+      ok: true,
+      message: "succesful",
+      list: portfolioCaltigoryProjectList,
+    });
   } catch (error) {
     res.status(500).json({ ok: false, message: `server error: ${error}` });
     console.log(`server error: ${error}`);
