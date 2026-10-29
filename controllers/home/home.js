@@ -3,6 +3,7 @@ const homeRouter = express.Router();
 const portfolioProjectData = require("../../modules/admin/portfolioProjects");
 const notificationsData = require("../../modules/admin/notifications");
 const bookingServiceData = require("../../modules/admin/bookingService");
+const emailWorkerData = require("../../modules/admin/emailWorker");
 //devmode
 const createStaticPortfolioProject = async () => {
   try {
@@ -565,6 +566,19 @@ homeRouter.post(
           ok: false,
           message: `server error: somting went wrong can't proccess your requst at this time`,
         });
+      const emailWorkerDataSchema = {
+        workType: "booking-requst-response",
+        email: body.email,
+        isJobDone: false,
+        jobDocId: createBookingData._id,
+      };
+      const createEmailWorkerData = await emailWorkerData.insertOne(
+        emailWorkerDataSchema,
+      );
+      if (!createEmailWorkerData)
+        return res
+          .status(500)
+          .json({ ok: false, message: `server error: somting went wrong` });
       //
       const notificationSchema = {
         title: "New Booking",
@@ -573,7 +587,7 @@ homeRouter.post(
         isAction: false,
         url: "",
         isViewed: false,
-        notificationActionId: "",
+        notificationActionId: createEmailWorkerData._id,
       };
       const createNotifcation =
         await notificationsData.insertOne(notificationSchema);
@@ -581,6 +595,9 @@ homeRouter.post(
         return res
           .status(500)
           .json({ ok: false, message: `server error: somting went wrong` });
+      res
+        .status(201)
+        .json({ ok: true, message: "service requst sent succesfully" });
     } catch (error) {
       res.status(500).json({ ok: false, message: `server error: ${error}` });
       console.log(`server error while creating client bookings: ${error}`);
