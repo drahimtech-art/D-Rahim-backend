@@ -2,6 +2,7 @@ const express = require("express");
 const homeRouter = express.Router();
 const portfolioProjectData = require("../../modules/admin/portfolioProjects");
 const notificationsData = require("../../modules/admin/notifications");
+const bookingServiceData = require("../../modules/admin/bookingService");
 //devmode
 const createStaticPortfolioProject = async () => {
   try {
@@ -554,7 +555,17 @@ homeRouter.post(
         companyName: body.companyName,
         aboutProject: body.aboutProject,
         trafficSource: body.trafficSource,
+        status: false,
       };
+      const createBookingData =
+        await bookingServiceData.insertOne(clientBookingInfo);
+      if (!createBookingData)
+        return res
+          .status(500)
+          .json({
+            ok: false,
+            message: `server error: somting went wrong can't proccess your requst at this time`,
+          });
       //
       const notificationSchema = {
         title: "New Booking",
