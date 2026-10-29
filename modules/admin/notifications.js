@@ -8,6 +8,7 @@ const notificationSchema = new Schema(
     isAction: { type: Boolean, required: true },
     url: { type: String, required: true },
     isViewed: { type: Boolean, required: true },
+    notificationActionId: { type: String, required: true },
   },
   { timestamps: true },
 );

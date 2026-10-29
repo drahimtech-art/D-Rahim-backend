@@ -538,6 +538,7 @@ async function validateClientServiceRequstDataBody(req, res, next) {
     );
   }
 }
+//
 homeRouter.post(
   "/api/client/requst/service",
   validateclient,
@@ -560,12 +561,10 @@ homeRouter.post(
       const createBookingData =
         await bookingServiceData.insertOne(clientBookingInfo);
       if (!createBookingData)
-        return res
-          .status(500)
-          .json({
-            ok: false,
-            message: `server error: somting went wrong can't proccess your requst at this time`,
-          });
+        return res.status(500).json({
+          ok: false,
+          message: `server error: somting went wrong can't proccess your requst at this time`,
+        });
       //
       const notificationSchema = {
         title: "New Booking",
