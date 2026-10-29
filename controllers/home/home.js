@@ -440,7 +440,6 @@ const createStaticPortfolioProject = async () => {
     ];
     const sendCreateDataRequst =
       await portfolioProjectData.insertMany(projectsList);
-    console.log(sendCreateDataRequst);
   } catch (error) {
     console.log(
       "Got Error while trying to create static portfolio project :",
