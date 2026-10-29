@@ -573,6 +573,7 @@ homeRouter.post(
         isAction: false,
         url: "",
         isViewed: false,
+        notificationActionId: "",
       };
       const createNotifcation =
         await notificationsData.insertOne(notificationSchema);
