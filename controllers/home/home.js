@@ -1,6 +1,7 @@
 const express = require("express");
 const homeRouter = express.Router();
 const portfolioProjectData = require("../../modules/admin/portfolioProjects");
+const notificationsData = require("../../modules/admin/notifications");
 //devmode
 const createStaticPortfolioProject = async () => {
   try {
@@ -494,5 +495,85 @@ homeRouter.get("/ourwork/projectlist", validateclient, async (req, res) => {
     console.log(`server error: ${error}`);
   }
 });
-
+//
+function validateEmail(e) {
+  if (typeof e !== "string") return false;
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(e.trim());
+}
+//middleware
+async function validateClientServiceRequstDataBody(req, res, next) {
+  try {
+    const body = req.body;
+    if (!body)
+      return res
+        .status(400)
+        .json({ ok: false, message: "invalide requst body, body is empty" });
+    if (
+      !body.date ||
+      !body.time ||
+      !body.clientFullName ||
+      !body.jobTitle ||
+      !body.email ||
+      !body.phoneNumber ||
+      !body.companyName ||
+      !body.aboutProject ||
+      !body.trafficSource
+    )
+      return res.status(400).json({
+        ok: false,
+        message: "invalide requst body, one or more fileds are missing",
+      });
+    if (!validateEmail(body.email))
+      return res.status(400).json({
+        ok: false,
+        message: "invalide requst body, required a valide email address",
+      });
+    next();
+  } catch (error) {
+    res.status(500).json({ ok: false, message: `server error: ${error}` });
+    console.log(
+      `server error while validating client service requst data : ${error}`,
+    );
+  }
+}
+homeRouter.post(
+  "/api/client/requst/service",
+  validateclient,
+  validateClientServiceRequstDataBody,
+  async (req, res) => {
+    try {
+      const body = req.body;
+      const clientBookingInfo = {
+        date: body.date,
+        time: body.time,
+        clientFullName: body.clientFullName,
+        jobTitle: body.jobTitle,
+        email: body.email,
+        phoneNumber: body.phoneNumber,
+        companyName: body.companyName,
+        aboutProject: body.aboutProject,
+        trafficSource: body.trafficSource,
+      };
+      //
+      const notificationSchema = {
+        title: "New Booking",
+        content: clientBookingInfo.jobTitle,
+        date: new Date(),
+        isAction: false,
+        url: "",
+        isViewed: false,
+      };
+      const createNotifcation =
+        await notificationsData.insertOne(notificationSchema);
+      if (!createNotifcation)
+        return res
+          .status(500)
+          .json({ ok: false, message: `server error: somting went wrong` });
+    } catch (error) {
+      res.status(500).json({ ok: false, message: `server error: ${error}` });
+      console.log(`server error while creating client bookings: ${error}`);
+    }
+  },
+);
 module.exports = homeRouter;

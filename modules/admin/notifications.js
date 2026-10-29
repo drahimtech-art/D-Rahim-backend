@@ -14,5 +14,8 @@ const notificationSchema = new Schema(
 
 notificationSchema.index({ createdAt: -1 });
 
-const notificationsData = mongoose.model("admin_notificationsData");
+const notificationsData = mongoose.model(
+  "admin_notificationsData",
+  notificationSchema,
+);
 module.exports = notificationsData;
